@@ -1,0 +1,29 @@
+{
+  "name": "holiday-rezervation",
+  "version": "1.0.0",
+  "description": "![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)\r ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)\r ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=111)\r ![LocalStorage](https://img.shields.io/badge/Storage-LocalStorage-1E3A8A?style=for-the-badge)\r ![IndexedDB](https://img.shields.io/badge/Storage-IndexedDB-0F766E?style=for-the-badge)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umutsadebal1/holiday-rezervation.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/umutsadebal1/holiday-rezervation/issues"
+  },
+  "homepage": "https://github.com/umutsadebal1/holiday-rezervation#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.20.0"
+  }
+}
