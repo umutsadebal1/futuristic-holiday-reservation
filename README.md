@@ -153,7 +153,7 @@ npm run dev
 
 PostgreSQL must be running and backend environment variables should be configured securely in your local or deployment environment.
 
----
+--- 
 
 <a id="screenshots"></a>
 ## 🖼️ Screenshots
