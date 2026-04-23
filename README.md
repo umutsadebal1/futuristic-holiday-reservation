@@ -131,7 +131,7 @@ holiday-rezervation/
 ## 🚀 Getting Started
 
 ### 1. Clone the Repository
-
+ 
 ```bash
 git clone https://github.com/umutsadebal1/futuristic-holiday-reservation.git
 cd futuristic-holiday-reservation
