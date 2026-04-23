@@ -133,8 +133,8 @@ holiday-rezervation/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/umutsadebal1/holiday-rezervation.git
-cd holiday-rezervation
+git clone https://github.com/umutsadebal1/futuristic-holiday-reservation.git
+cd futuristic-holiday-reservation
 ```
 
 ### 2. Launch the Frontend
