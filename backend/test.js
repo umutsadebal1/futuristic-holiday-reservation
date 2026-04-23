@@ -1,1 +1,0 @@
-const db_password = "supersecretpassword";
