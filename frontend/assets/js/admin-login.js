@@ -16,18 +16,20 @@ function buildApiUrl(pathname) {
 
   if (typeof window === 'undefined') return normalizedPath;
 
-  const isLocalFile = window.location.protocol === 'file:';
-  if (isLocalFile) {
+  const meta = document.querySelector('meta[name="api-base"]');
+  const metaValue = meta ? String(meta.content || '').trim() : '';
+  if (metaValue) return metaValue.replace(/\/+$/, '') + normalizedPath;
+
+  const hostname = String(window.location.hostname || '').toLowerCase();
+  const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+
+  if (window.location.protocol === 'file:') {
     return API_BASES[0] + normalizedPath;
   }
-
-  if (window.location.port === '5000') {
-    return normalizedPath;
+  if (isLocalHost && window.location.port !== '5000' && window.location.port !== '5443') {
+    return API_BASES[0] + normalizedPath;
   }
-
-  const secure = window.location.protocol === 'https:';
-  const preferred = secure ? API_BASES[1] : API_BASES[0];
-  return preferred + normalizedPath;
+  return normalizedPath;
 }
 
 async function requestPost(pathname, payload, headers) {

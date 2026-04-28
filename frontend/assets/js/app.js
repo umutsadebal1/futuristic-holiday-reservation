@@ -2261,8 +2261,14 @@ function slugifyText(value) {
 
 function resolveApiBaseUrl() {
   if (typeof window === 'undefined') return '';
-  if (window.location.port === '5000') return '';
-  return 'http://localhost:5000';
+  const meta = document.querySelector('meta[name="api-base"]');
+  const metaValue = meta ? String(meta.content || '').trim() : '';
+  if (metaValue) return metaValue.replace(/\/+$/, '');
+  const hostname = String(window.location.hostname || '').toLowerCase();
+  const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+  if (window.location.protocol === 'file:') return 'http://localhost:5000';
+  if (isLocalHost && window.location.port !== '5000' && window.location.port !== '5443') return 'http://localhost:5000';
+  return '';
 }
 
 function buildApiUrl(pathname) {
