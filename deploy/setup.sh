@@ -61,6 +61,8 @@ else
 fi
 
 cyan "5/9 PostgreSQL kullanici + veritabani"
+systemctl enable --now postgresql
+sleep 2
 DB_USER="tatilrez"
 DB_NAME="tatilrez"
 ENV_FILE="${APP_DIR}/backend/.env"
