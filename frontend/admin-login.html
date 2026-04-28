@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://www.recaptcha.net; img-src 'self' data: https:; connect-src 'self' http://localhost:5000 https://localhost:5000 https://localhost:5443 https://www.google.com https://www.recaptcha.net https://www.gstatic.com https://recaptchaenterprise.googleapis.com; frame-src 'self' https://www.google.com https://www.recaptcha.net https://www.gstatic.com; frame-ancestors 'none'; base-uri 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Girisi | TatilRez</title>
+  <meta name="api-base" content="">
+  <meta name="recaptcha-site-key" content="">
+  <link rel="icon" type="image/png" href="img/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/admin-login.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+  <script src="assets/js/maintenance-guard.js" defer></script>
+</head>
+<body>
+  <main class="admin-login-shell">
+    <section class="admin-login-card" aria-label="Admin dogrulama formu">
+      <a href="index.html" class="back-link">Siteye don</a>
+      <button id="toggleAdminThemeBtn" type="button" class="theme-toggle-btn" aria-label="Temayi degistir">Dark Mode</button>
+
+      <p class="admin-kicker">Yetki Kontrolu</p>
+      <h1>Admin Panel Giris Dogrulamasi</h1>
+      <p class="admin-subtitle">Sadece admin rutbesine sahip kullanicilar, token ve human check dogrulamasindan sonra panele yonlendirilir.</p>
+
+      <form id="adminLoginForm" class="admin-login-form" autocomplete="off">
+        <label for="adminEmailInput">E-posta</label>
+        <input id="adminEmailInput" type="email" required placeholder="ornek@tatilrez.com">
+
+        <label for="adminPasswordInput">Şifre</label>
+        <input id="adminPasswordInput" type="password" required minlength="6" placeholder="Şifrenizi giriniz">
+
+        <button id="adminLoginSubmitBtn" type="submit">Doğrula ve Panele Gir</button>
+      </form>
+
+      <p id="adminHumanCheckMode" class="admin-humancheck-mode" role="status" aria-live="polite">Human check hazirlaniyor...</p>
+
+      <p id="adminLoginFeedback" class="admin-feedback" role="status" aria-live="polite"></p>
+
+      <div class="admin-help-row">
+        <span>Admin yetkiniz yoksa bu ekrani kullanamazsiniz</span>
+        <a href="index.html">Ana sayfaya git</a>
+      </div>
+    </section>
+
+    <aside class="admin-login-showcase" aria-hidden="true">
+      <div class="showcase-orbit"></div>
+      <div class="showcase-core"></div>
+      <div class="showcase-copy">
+        <h2>Portal Security</h2>
+        <p>Hesap girisi yapildiktan sonra token ve rutbe API tarafindan tekrar kontrol edilir.</p>
+      </div>
+    </aside>
+  </main>
+
+  <script src="assets/js/admin-login.js"></script>
+</body>
+</html>

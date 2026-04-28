@@ -5,7 +5,9 @@ backend/node_modules/
 package-lock.json
 .ds_store
 .DS_Store
-DB todos/
+Todos/
 signpage.js
 signpage.html
 local-security/
+backend/certs/
+backend/uploads/

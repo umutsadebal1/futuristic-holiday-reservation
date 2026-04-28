@@ -1,4 +1,6 @@
 // Tema (Açık/Karanlık Mod) Seçicisini Başlat
+
+
 const initThemeToggle = () => {
     // Tema butonunu ve localStorage'dan kaydedilen temayı al
     const themeToggle = document.getElementById('themeToggle');
@@ -37,6 +39,38 @@ const getAuthSession = () => {
   } catch (e) {
     return null;
   }
+};
+
+const AUTH_TOKENS_STORAGE_KEY = 'authTokens';
+
+const getAuthTokens = () => {
+  try {
+    const raw = localStorage.getItem(AUTH_TOKENS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+};
+
+const getAccessToken = () => {
+  const tokens = getAuthTokens();
+  if (tokens && tokens.accessToken) {
+    return String(tokens.accessToken);
+  }
+
+  const session = getAuthSession();
+  if (session && session.token) {
+    return String(session.token);
+  }
+
+  return '';
+};
+
+const ADMIN_ROLES = ['patron', 'ust_yetkili', 'alt_yetkili'];
+
+const isAdminRole = (role) => {
+  const safeRole = String(role || '').trim().toLowerCase();
+  return ADMIN_ROLES.includes(safeRole);
 };
 
 const SAVED_SEARCHES_KEY = 'savedSearches';
@@ -114,6 +148,8 @@ function getUserMenuIconSvg(action) {
       return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5h16v7H4z"></path><path d="M8.5 8.5V6h7v2.5M12 8.5v7"></path></svg>';
     case 'saved-searches':
       return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"></circle><path d="M15 15l5 5"></path></svg>';
+    case 'admin':
+      return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7.5 3v6c0 4.6-3.2 8.5-7.5 9.7C7.7 20.5 4.5 16.6 4.5 12V6L12 3z"></path><path d="M9.1 12.5l1.9 1.9 3.9-4.1"></path></svg>';
     case 'logout':
       return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 17l5-5-5-5"></path><path d="M20 12H9"></path><path d="M4 4h5v16H4z"></path></svg>';
     default:
@@ -241,8 +277,10 @@ function openProfileOverview() {
 
       localStorage.setItem('user', JSON.stringify(nextStoredUser));
       localStorage.setItem('authSession', JSON.stringify({
-        ...session,
-        name: nextName
+        userId: session.userId,
+        email: session.email,
+        name: nextName,
+        loggedInAt: session.loggedInAt || new Date().toISOString()
       }));
 
       initAuthButtons();
@@ -432,6 +470,78 @@ const closeUserMenu = () => {
   }
 };
 
+async function requestAuthGet(pathname) {
+  const accessToken = getAccessToken();
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+  if (accessToken) {
+    headers.Authorization = 'Bearer ' + accessToken;
+  }
+
+  const response = await fetch(buildApiUrl(pathname), {
+    method: 'GET',
+    headers
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data.message || 'Islem basarisiz.');
+    error.status = response.status;
+    throw error;
+  }
+
+  return data;
+}
+
+async function fetchCurrentUserProfile() {
+  const accessToken = getAccessToken();
+  if (!accessToken) return null;
+
+  try {
+    const payload = await requestAuthGet('/api/auth/me');
+    return payload?.user || null;
+  } catch (_error) {
+    return null;
+  }
+}
+
+async function syncAdminMenuEntry() {
+  const menu = document.getElementById('userDropdownMenu');
+  if (!menu) return;
+
+  const existing = document.getElementById('openAdminLoginMenuBtn');
+  if (existing) existing.remove();
+
+  let session = getAuthSession();
+  if (!session || (!session.userId && !session.email)) return;
+
+  const profile = await fetchCurrentUserProfile();
+  if (!profile) return;
+
+  const role = String(profile.role || '').trim().toLowerCase();
+  session = {
+    userId: profile.id || session.userId,
+    email: profile.email || session.email,
+    name: profile.name || session.name,
+    loggedInAt: session.loggedInAt || new Date().toISOString()
+  };
+  localStorage.setItem('authSession', JSON.stringify(session));
+
+  if (!isAdminRole(role)) return;
+
+  const separator = menu.querySelector('.user-dropdown-separator');
+  const html = '<a href="admin-login.html" id="openAdminLoginMenuBtn" class="user-dropdown-item user-dropdown-admin" data-menu-action="admin"><span class="user-dropdown-icon" aria-hidden="true">'
+    + getUserMenuIconSvg('admin') + '</span><span>Admin Girisi</span></a>';
+
+  if (separator) {
+    separator.insertAdjacentHTML('beforebegin', html);
+    return;
+  }
+
+  menu.insertAdjacentHTML('beforeend', html);
+}
+
 // Kullanıcı oturum durumuna göre header butonlarını güncelle
 const initAuthButtons = () => {
   const authButtonsContainer = document.getElementById('authButtons');
@@ -514,13 +624,25 @@ const initAuthButtons = () => {
 
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', () => {
+      logoutBtn.addEventListener('click', async () => {
+        const session = getAuthSession();
+        if (session && (session.userId || session.email)) {
+          try {
+            await requestAuthApi('/api/auth/logout', {});
+          } catch (error) {
+            console.warn('Logout API cagrisinda hata olustu.', error);
+          }
+        }
+
+        localStorage.removeItem('authTokens');
         localStorage.removeItem('authSession');
         alert('Çıkış yapıldı!');
         closeUserMenu();
         initAuthButtons();
       });
     }
+
+    syncAdminMenuEntry();
   } else {
     authButtonsContainer.innerHTML = `
       <div class="auth-links">
@@ -545,6 +667,9 @@ const initAuthButtons = () => {
   const HOTEL_DATA = (typeof window !== "undefined" && window.HOTELS_BY_CITY)
     ? window.HOTELS_BY_CITY
     : {};
+
+const CATALOG_REFRESH_STORAGE_KEY = 'catalogUpdatedAt';
+let lastCatalogSyncAt = 0;
 
 const LIVE_PRICE_CITY_FACTOR = {
   antalya: 1.21,
@@ -721,7 +846,47 @@ function closeSignupModal() {
   signupModal.style.display = 'none';
 }
 
-function handleLoginSubmit(event) {
+async function requestAuthApi(pathname, payload) {
+  const accessToken = getAccessToken();
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+  if (accessToken) {
+    headers.Authorization = 'Bearer ' + accessToken;
+  }
+
+  const response = await fetch(buildApiUrl(pathname), {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload || {})
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data.message || 'Islem basarisiz.');
+    error.status = response.status;
+    throw error;
+  }
+
+  return data;
+}
+
+function resolveCityHeroImage(city) {
+  const explicitHeroImage = String(city?.heroImage || '').trim();
+  if (explicitHeroImage) return explicitHeroImage;
+
+  const regionImage = String(city?.image || '').trim();
+  if (!regionImage) return 'img/logo.png';
+
+  const converted = regionImage
+    .replace(/reg(?=\.[a-zA-Z0-9]+$)/i, 'hero')
+    .replace(/-reg(?=\.[a-zA-Z0-9]+$)/i, '-hero')
+    .replace(/_reg(?=\.[a-zA-Z0-9]+$)/i, '_hero');
+
+  return converted || regionImage;
+}
+
+async function handleLoginSubmit(event) {
   event.preventDefault();
 
   const email = document.getElementById('loginEmail')?.value?.trim() || '';
@@ -734,31 +899,70 @@ function handleLoginSubmit(event) {
 
   const storedUser = getStoredUser();
 
-  if (!storedUser) {
-    alert('Kayıtlı kullanıcı bulunamadı. Önce üye olun.');
+  const applyLoginState = (user, authPayload) => {
+    const nextStoredUser = {
+      ...(storedUser || {}),
+      id: user.id,
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      registeredAt: user.registeredAt || storedUser?.registeredAt || new Date().toISOString()
+    };
+
+    if (storedUser?.password) {
+      nextStoredUser.password = storedUser.password;
+    }
+
+    localStorage.setItem('user', JSON.stringify(nextStoredUser));
+    localStorage.setItem('authTokens', JSON.stringify({
+      accessToken: authPayload?.tokens?.accessToken || '',
+      refreshToken: authPayload?.tokens?.refreshToken || '',
+      tokenType: authPayload?.tokens?.tokenType || 'Bearer',
+      expiresIn: authPayload?.tokens?.expiresIn || '',
+      loggedInAt: new Date().toISOString()
+    }));
+    localStorage.setItem('authSession', JSON.stringify({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      loggedInAt: new Date().toISOString()
+    }));
+
     closeLoginModal();
-    openSignupModal();
-    return;
+    initAuthButtons();
+    alert('Giriş başarılı.');
+  };
+
+  try {
+    const payload = await requestAuthApi('/api/auth/login', { email, password });
+    if (!payload?.user) {
+      throw new Error('Giris yaniti alinmadi.');
+    }
+    applyLoginState(payload.user, payload);
+  } catch (error) {
+    if (error.status === 404) {
+      alert('Kayıtlı kullanıcı bulunamadı. Önce üye olun.');
+      closeLoginModal();
+      openSignupModal();
+      return;
+    }
+
+    const validUser = storedUser && storedUser.email === email && storedUser.password === password;
+    if (validUser) {
+      applyLoginState({
+        id: storedUser.id || storedUser.userId || 0,
+        name: storedUser.name,
+        email: storedUser.email,
+        registeredAt: storedUser.registeredAt
+      }, null);
+      return;
+    }
+
+    alert(error.message || 'E-posta veya şifre hatalı.');
   }
-
-  const validUser = storedUser.email === email && storedUser.password === password;
-  if (!validUser) {
-    alert('E-posta veya şifre hatalı.');
-    return;
-  }
-
-  localStorage.setItem('authSession', JSON.stringify({
-    email: storedUser.email,
-    name: storedUser.name,
-    loggedInAt: new Date().toISOString()
-  }));
-
-  closeLoginModal();
-  initAuthButtons();
-  alert('Giriş başarılı.');
 }
 
-function handleSignupSubmit(event) {
+async function handleSignupSubmit(event) {
   event.preventDefault();
 
   const name = document.getElementById('signupName')?.value?.trim() || '';
@@ -781,23 +985,73 @@ function handleSignupSubmit(event) {
     return;
   }
 
-  const userData = {
-    name,
-    email,
-    password,
-    registeredAt: new Date().toISOString()
+  const applySignupState = (user, authPayload) => {
+    const userData = {
+      id: user.id,
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      password,
+      registeredAt: user.registeredAt || new Date().toISOString()
+    };
+
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('authTokens', JSON.stringify({
+      accessToken: authPayload?.tokens?.accessToken || '',
+      refreshToken: authPayload?.tokens?.refreshToken || '',
+      tokenType: authPayload?.tokens?.tokenType || 'Bearer',
+      expiresIn: authPayload?.tokens?.expiresIn || '',
+      loggedInAt: new Date().toISOString()
+    }));
+    localStorage.setItem('authSession', JSON.stringify({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      loggedInAt: new Date().toISOString()
+    }));
+
+    closeSignupModal();
+    initAuthButtons();
+    alert('Hesabınız oluşturuldu ve giriş yapıldı.');
   };
 
-  localStorage.setItem('user', JSON.stringify(userData));
-  localStorage.setItem('authSession', JSON.stringify({
-    email: userData.email,
-    name: userData.name,
-    loggedInAt: new Date().toISOString()
-  }));
+  try {
+    const payload = await requestAuthApi('/api/auth/register', { name, email, password });
+    if (!payload?.user) {
+      throw new Error('Kayit yaniti alinmadi.');
+    }
+    applySignupState(payload.user, payload);
+  } catch (error) {
+    if (error.status === 409) {
+      alert('Bu e-posta adresi zaten kullanılıyor.');
+      return;
+    }
 
-  closeSignupModal();
-  initAuthButtons();
-  alert('Hesabınız oluşturuldu ve giriş yapıldı.');
+    const userData = {
+      name,
+      email,
+      password,
+      registeredAt: new Date().toISOString()
+    };
+
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('authTokens', JSON.stringify({
+      accessToken: '',
+      refreshToken: '',
+      tokenType: 'Bearer',
+      expiresIn: '',
+      loggedInAt: new Date().toISOString()
+    }));
+    localStorage.setItem('authSession', JSON.stringify({
+      email: userData.email,
+      name: userData.name,
+      loggedInAt: new Date().toISOString()
+    }));
+
+    closeSignupModal();
+    initAuthButtons();
+    alert('Hesabınız oluşturuldu ve giriş yapıldı.');
+  }
 }
 
 function toggleLoginPasswordVisibility() {
@@ -1134,38 +1388,143 @@ const slideCityTestimonial = (direction) => {
   setActiveTestimonialCard(testimonialsTrack, currentCityTestimonial);
 };
 
-// Tüm bölgeler ve otelleri verileri
-const regions = [
-  { name: 'Antalya', hotels: 172, image: 'img/antreg.jpg', link: 'city.html?city=antalya', class: 'large-left' },
-  { name: 'Mardin', hotels: 106, image: 'img/marreg.jpg', link: 'city.html?city=mardin', class: 'top-right' },
-  { name: 'Diyarbakır', hotels: 145, image: 'img/diyreg.jpg', link: 'city.html?city=diyarbakir', class: 'middle-left' },
-  { name: 'Muğla', hotels: 238, image: 'img/mugreg.jpg', link: 'city.html?city=mugla', class: 'middle-right' },
-  { name: 'Van', hotels: 221, image: 'img/vanreg.jpg', link: 'city.html?city=van', class: 'middle-left' },
-  { name: 'Trabzon', hotels: 84, image: 'img/trabreg.jpg', link: 'city.html?city=trabzon', class: 'bottom-left' },
-  { name: 'Bodrum', hotels: 189, image: 'img/bodreg.jpg', link: 'city.html?city=bodrum', class: 'bottom-left' },
-  { name: 'Bursa', hotels: 156, image: 'img/burreg.jpg', link: 'city.html?city=bursa', class: 'bottom-right' },
-  { name: 'İzmir', hotels: 267, image: 'img/izreg.jpg', link: 'city.html?city=izmir', class: 'bottom-right' },
-  { name: 'İstanbul', hotels: 314, image: 'img/logo.png', link: 'city.html?city=istanbul', class: 'bottom-right' },
-  { name: 'Ankara', hotels: 173, image: 'img/logo.png', link: 'city.html?city=ankara', class: 'bottom-right' },
-  { name: 'Gaziantep', hotels: 129, image: 'img/logo.png', link: 'city.html?city=gaziantep', class: 'bottom-right' }
+const REGION_RENDER_ORDER = [
+  'antalya',
+  'mardin',
+  'diyarbakir',
+  'mugla',
+  'van',
+  'trabzon',
+  'bodrum',
+  'bursa',
+  'izmir',
+  'istanbul',
+  'ankara',
+  'gaziantep'
 ];
+
+function buildRegionCatalog() {
+  const cityEntries = Object.entries(CITY_DATA || {}).filter(([, city]) => {
+    return city?.showInRegions !== false;
+  });
+  const orderMap = new Map(REGION_RENDER_ORDER.map((slug, index) => [slug, index]));
+
+  return cityEntries
+    .sort((a, b) => {
+      const aOrder = orderMap.has(a[0]) ? orderMap.get(a[0]) : Number.MAX_SAFE_INTEGER;
+      const bOrder = orderMap.has(b[0]) ? orderMap.get(b[0]) : Number.MAX_SAFE_INTEGER;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      return String(a[1]?.name || a[0]).localeCompare(String(b[1]?.name || b[0]), 'tr');
+    })
+    .map(([slug, city]) => {
+      const hotelsBySlug = Array.isArray(HOTEL_DATA[slug]) ? HOTEL_DATA[slug] : [];
+      const hotelsCount = hotelsBySlug.length > 0
+        ? hotelsBySlug.length
+        : Number(city.hotels || city.hotelsCount || 0);
+
+      return {
+        slug,
+        name: city.name || slug,
+        hotels: Number.isFinite(hotelsCount) ? hotelsCount : 0,
+        image: city.image || 'img/logo.png',
+        heroImage: resolveCityHeroImage(city),
+        link: 'city.html?city=' + encodeURIComponent(slug),
+        class: city.regionClass || 'bottom-right'
+      };
+    });
+}
+
+function bindRegionFilterDelegation() {
+  const filterWrap = document.getElementById('regionsFilterButtons');
+  if (!filterWrap || filterWrap.dataset.bound === 'true') return;
+
+  filterWrap.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-city]');
+    if (!button) return;
+
+    const citySlug = button.getAttribute('data-city') || '';
+    if (!citySlug) return;
+
+    filterWrap.querySelectorAll('[data-city]').forEach((item) => {
+      item.classList.toggle('active', item === button);
+    });
+
+    const params = new URLSearchParams();
+    params.set('city', citySlug);
+
+    const checkIn = document.getElementById('checkIn')?.value || '';
+    const checkOut = document.getElementById('checkOut')?.value || '';
+    const guests = document.getElementById('guests')?.value || '';
+    const rooms = document.getElementById('rooms')?.value || '';
+
+    if (checkIn) params.set('checkIn', checkIn);
+    if (checkOut) params.set('checkOut', checkOut);
+    if (guests) params.set('guests', guests);
+    if (rooms) params.set('rooms', rooms);
+
+    window.location.href = 'city.html?' + params.toString();
+  });
+
+  filterWrap.dataset.bound = 'true';
+}
+
+function renderRegionFilterButtons(regionList) {
+  const filterWrap = document.getElementById('regionsFilterButtons');
+  if (!filterWrap) return;
+
+  const cityButtons = (regionList || []).slice(0, 8);
+  filterWrap.innerHTML = cityButtons.map((region, index) => {
+    const activeClass = index === 0 ? 'active' : '';
+    return '<button class="filter-tag ' + activeClass + '" type="button" data-city="'
+      + region.slug + '">' + region.name + '</button>';
+  }).join('');
+
+  bindRegionFilterDelegation();
+}
+
+function applyRegionImageFallbacks(container) {
+  if (!container) return;
+
+  container.querySelectorAll('.region-card[data-region-image]').forEach((card) => {
+    const imagePath = String(card.getAttribute('data-region-image') || '').trim();
+    if (!imagePath) {
+      card.style.backgroundImage = "url('img/logo.png')";
+      return;
+    }
+
+    const probe = new Image();
+    probe.onerror = () => {
+      card.style.backgroundImage = "url('img/logo.png')";
+    };
+    probe.src = imagePath;
+  });
+}
 
 // Bölgeleri sayfaya render et (kaskad kartları)
 const loadRegions = () => {
-    const container = document.getElementById('regionsCascade');
-    if (!container) return;
-    
-    // Bölge verilerini HTML kartlarına dönüştür
-    container.innerHTML = regions.map(r => `
-        <div class="region-card ${r.class}" style="background-image: url('${r.image}');"> <!-- Arkaplan görüntüsü -->
-            <div class="region-overlay"></div> <!-- Koyu katman -->
-            <div class="region-content">
-                <h3 class="region-name">${r.name}</h3> <!-- Bölge adı -->
-                <span class="region-hotels">${r.hotels} Otel</span> <!-- Otel sayısı -->
-            </div>
-            <a href="${r.link}" class="region-link"></a> <!-- Şehir sayfasına link -->
-        </div>
-    `).join('');
+  const container = document.getElementById('regionsCascade');
+  if (!container) return;
+
+  const regions = buildRegionCatalog();
+  renderRegionFilterButtons(regions);
+
+  container.innerHTML = regions.map((region) => {
+    const imagePath = String(region.image || 'img/logo.png');
+    const imagePathForCss = imagePath.replace(/'/g, '%27');
+    const imagePathForAttr = imagePath.replace(/"/g, '&quot;');
+
+    return ''
+      + '<div class="region-card ' + region.class + '" data-region-image="' + imagePathForAttr + '" style="background-image: url(\'' + imagePathForCss + '\');">'
+      + '  <div class="region-overlay"></div>'
+      + '  <div class="region-content">'
+      + '    <h3 class="region-name">' + region.name + '</h3>'
+      + '    <span class="region-hotels">' + region.hotels + ' Otel</span>'
+      + '  </div>'
+      + '  <a href="' + region.link + '" class="region-link"></a>'
+      + '</div>';
+  }).join('');
+
+  applyRegionImageFallbacks(container);
 };
 
 // Rezervasyonları yönetmek için sınıf
@@ -1894,6 +2253,104 @@ const CITY_DATA = (typeof window !== "undefined" && window.CITIES) ? window.CITI
 // Şehir başlık verilerini window.CITY_TITLES'den al (title.js'den geliyor)
 const CITY_TITLES = (typeof window !== "undefined" && window.CITY_TITLES) ? window.CITY_TITLES : {};
 
+function slugifyText(value) {
+  return normalizeText(value)
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
+function resolveApiBaseUrl() {
+  if (typeof window === 'undefined') return '';
+  if (window.location.port === '5000') return '';
+  return 'http://localhost:5000';
+}
+
+function buildApiUrl(pathname) {
+  const base = resolveApiBaseUrl();
+  const safePath = pathname.startsWith('/') ? pathname : '/' + pathname;
+  return base + safePath;
+}
+
+function clearDataObject(target) {
+  Object.keys(target).forEach((key) => {
+    delete target[key];
+  });
+}
+
+function applyCatalogPayload(payload) {
+  const cities = Array.isArray(payload?.cities) ? payload.cities : [];
+  const hotels = Array.isArray(payload?.hotels) ? payload.hotels : [];
+
+  if (cities.length === 0) return false;
+
+  const nextCityMap = {};
+  const nextHotelMap = {};
+
+  cities.forEach((city) => {
+    const slug = slugifyText(city.slug || city.name || '');
+    if (!slug) return;
+
+    nextCityMap[slug] = {
+      slug,
+      name: city.name || slug,
+      description: city.description || '',
+      image: city.image || 'img/logo.png',
+      heroImage: city.heroImage || '',
+      heroBackground: city.heroBackground || 'linear-gradient(135deg, rgba(11, 137, 105, 0.667), rgba(4, 102, 132, 0.7))',
+      regionClass: city.regionClass || 'bottom-right',
+      showInRegions: city.showInRegions !== false,
+      hotels: Number(city.hotelsCount) || 0,
+      aliases: Array.isArray(city.aliases) ? city.aliases : [slug, city.name || slug]
+    };
+
+    nextHotelMap[slug] = [];
+  });
+
+  hotels.forEach((hotel) => {
+    const citySlug = slugifyText(hotel.citySlug || '');
+    if (!citySlug || !nextCityMap[citySlug]) return;
+
+    const hotelItem = {
+      name: hotel.name || 'Isimsiz Otel',
+      image: hotel.image || 'img/logo.png',
+      rating: Number(hotel.rating) || 0,
+      price: Number(hotel.price) || 0,
+      features: Array.isArray(hotel.features) ? hotel.features : []
+    };
+
+    nextHotelMap[citySlug].push(hotelItem);
+  });
+
+  Object.keys(nextCityMap).forEach((slug) => {
+    nextCityMap[slug].hotels = nextHotelMap[slug].length;
+  });
+
+  clearDataObject(CITY_DATA);
+  Object.assign(CITY_DATA, nextCityMap);
+
+  clearDataObject(HOTEL_DATA);
+  Object.assign(HOTEL_DATA, nextHotelMap);
+
+  return true;
+}
+
+async function syncCatalogFromApi() {
+  try {
+    const response = await fetch(buildApiUrl('/api/bootstrap'));
+    if (!response.ok) {
+      throw new Error('Katalog API istegi basarisiz: ' + response.status);
+    }
+
+    const payload = await response.json();
+    const applied = applyCatalogPayload(payload);
+    if (applied) lastCatalogSyncAt = Date.now();
+    return applied;
+  } catch (error) {
+    console.warn('API katalog verisi alinamadi, static veri kullaniliyor.', error);
+    return false;
+  }
+}
+
 // Kullanıcı girişini normalize edip şehir adlarıyla eşleştir
 function resolveCitySlug(input) {
   const normalizedInput = normalizeText(input || "").trim();
@@ -1966,8 +2423,12 @@ function renderCityPage() {
 
   // Şehir resmini gaçerleştir
   if (cityImageEl) {
-    cityImageEl.src = city.image;
+    cityImageEl.src = resolveCityHeroImage(city);
     cityImageEl.alt = city.name;
+    cityImageEl.onerror = () => {
+      cityImageEl.onerror = null;
+      cityImageEl.src = 'img/logo.png';
+    };
   }
 
   // Hero bölümünün arkaplan rengini/gradyanını ayarla
@@ -2036,6 +2497,141 @@ function getHotelsByPage() {
 
   activeHotelsCitySlug = '';
   return [];
+}
+
+function ensureHotelPortalPanel() {
+  let panel = document.getElementById('hotelPortalPanel');
+  if (panel) return panel;
+
+  panel = document.createElement('aside');
+  panel.id = 'hotelPortalPanel';
+  panel.className = 'hotel-portal-panel';
+  panel.innerHTML = ''
+    + '<div class="hotel-portal-ring" aria-hidden="true"></div>'
+    + '<div class="hotel-portal-core" aria-hidden="true"></div>'
+    + '<div class="hotel-portal-content">'
+    + '  <p class="hotel-portal-kicker">Portal View</p>'
+    + '  <h3 id="hotelPortalTitle">Otel Kesfi</h3>'
+    + '  <p id="hotelPortalMeta" class="hotel-portal-meta">Kartin uzerine gelerek onizleme ac.</p>'
+    + '  <div id="hotelPortalGallery" class="hotel-portal-gallery"></div>'
+    + '</div>';
+
+  document.body.appendChild(panel);
+
+  panel.addEventListener('mouseenter', () => {
+    panel.classList.add('is-hovered');
+  });
+
+  panel.addEventListener('mouseleave', () => {
+    panel.classList.remove('is-hovered');
+    panel.classList.remove('show');
+  });
+
+  return panel;
+}
+
+function buildHotelPortalGallery(hotel, list) {
+  const source = Array.isArray(list) ? list : [];
+  const leadImage = String(hotel?.image || '').trim();
+  const others = source
+    .filter((item) => String(item?.name || '') !== String(hotel?.name || ''))
+    .slice(0, 6)
+    .map((item) => ({
+      name: item?.name || 'Otel',
+      image: String(item?.image || '').trim() || 'img/logo.png'
+    }));
+
+  const images = [];
+  if (leadImage) {
+    images.push({
+      name: hotel?.name || 'Secili Otel',
+      image: leadImage
+    });
+  }
+
+  return images.concat(others).slice(0, 6);
+}
+
+function bindHotelPortalInteractions(list) {
+  const grid = document.getElementById('hotelsGrid');
+  if (!grid) return;
+
+  const cards = grid.querySelectorAll('.js-hotel-card');
+  if (!cards.length) return;
+
+  const panel = ensureHotelPortalPanel();
+  const titleEl = document.getElementById('hotelPortalTitle');
+  const metaEl = document.getElementById('hotelPortalMeta');
+  const galleryEl = document.getElementById('hotelPortalGallery');
+
+  let closeTimer = 0;
+
+  const scheduleClose = () => {
+    if (closeTimer) window.clearTimeout(closeTimer);
+    closeTimer = window.setTimeout(() => {
+      if (!panel.classList.contains('is-hovered')) {
+        panel.classList.remove('show');
+      }
+      closeTimer = 0;
+    }, 140);
+  };
+
+  const openForCard = (card) => {
+    if (closeTimer) {
+      window.clearTimeout(closeTimer);
+      closeTimer = 0;
+    }
+
+    const raw = card.getAttribute('data-hotel-json') || '';
+    if (!raw) return;
+
+    let hotel = null;
+    try {
+      hotel = JSON.parse(decodeURIComponent(raw));
+    } catch (_error) {
+      hotel = null;
+    }
+    if (!hotel) return;
+
+    const gallery = buildHotelPortalGallery(hotel, list);
+
+    if (titleEl) titleEl.textContent = hotel.name || 'Otel Kesfi';
+    if (metaEl) {
+      metaEl.textContent = 'Puan: ' + (Number(hotel.rating) || 0).toFixed(1) + ' - Fiyat: ₺' + (Number(hotel.price) || 0) + ' - Portal galeri acik';
+    }
+
+    if (galleryEl) {
+      galleryEl.innerHTML = gallery.map((item, index) => {
+        return ''
+          + '<figure class="hotel-portal-thumb ' + (index === 0 ? 'lead' : '') + '">'
+          + '  <img src="' + item.image + '" alt="' + escapeUiHtml(item.name) + '">'
+          + '  <figcaption>' + escapeUiHtml(item.name) + '</figcaption>'
+          + '</figure>';
+      }).join('');
+
+      galleryEl.querySelectorAll('img').forEach((img) => {
+        img.addEventListener('error', () => {
+          img.src = 'img/logo.png';
+        }, { once: true });
+      });
+    }
+
+    panel.classList.add('show');
+  };
+
+  cards.forEach((card) => {
+    card.addEventListener('mouseenter', () => {
+      openForCard(card);
+    });
+
+    card.addEventListener('mouseleave', () => {
+      scheduleClose();
+    });
+  });
+
+  grid.addEventListener('mouseleave', () => {
+    scheduleClose();
+  });
 }
 
 // Otel listesini HTML kartlarına dönüştürüp sayfaya render et
@@ -2131,6 +2727,8 @@ function renderHotels(list) {
       img.src = 'img/logo.png';
     }, { once: true });
   });
+
+  bindHotelPortalInteractions(list);
 
   document.dispatchEvent(new CustomEvent('hotels:rendered', { detail: { hotels: list } }));
 }
@@ -2345,7 +2943,10 @@ function saveRecentSearch(value) {
 
 // Önerilecek tüm şehir ve otel adlarını getir
 function getSuggestionPool() {
-  const regions = Object.values(CITY_DATA).map((city) => city.name);
+  const regions = Object.values(CITY_DATA).flatMap((city) => {
+    const aliases = Array.isArray(city.aliases) ? city.aliases : [];
+    return [city.name, city.slug, ...aliases].filter(Boolean);
+  });
   
   // Tüm otelleri topla ve adlarını al
   const hotels = Object.values(HOTEL_DATA)
@@ -2354,6 +2955,42 @@ function getSuggestionPool() {
 
   // Benzersiz öneriler döndür (şehirler + otel adları)
   return Array.from(new Set([...regions, ...hotels]));
+}
+
+async function resolveCitySlugForSearch(queryText) {
+  const safeText = String(queryText || '').trim();
+  if (!safeText) return '';
+
+  let citySlug = resolveCitySlug(safeText);
+  if (citySlug) return citySlug;
+
+  await syncCatalogFromApi();
+  citySlug = resolveCitySlug(safeText);
+  if (citySlug) return citySlug;
+
+  try {
+    const response = await fetch(buildApiUrl('/api/cities'));
+    if (response.ok) {
+      const rows = await response.json();
+      if (Array.isArray(rows) && rows.length) {
+        const normalizedInput = normalizeText(safeText);
+        for (const city of rows) {
+          const aliases = Array.isArray(city.aliases) ? city.aliases : [];
+          const candidates = [city.slug, city.name, ...aliases]
+            .filter(Boolean)
+            .map((value) => normalizeText(value));
+
+          if (candidates.some((candidate) => candidate === normalizedInput || normalizedInput.includes(candidate))) {
+            return city.slug || '';
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('Arama fallback city API cagrisinda hata olustu.', error);
+  }
+
+  return '';
 }
 
 // Çip (tag) görünüşlü düğmeleri oluştur ve göster
@@ -2443,7 +3080,16 @@ function initSmartSearch() {
 
   // Input'a focus olunca ve yeterli yazı varsa öneriler göster
   destinationEl.addEventListener("focus", () => {
+    if (Date.now() - lastCatalogSyncAt > 45000) {
+      syncCatalogFromApi();
+    }
     if (destinationEl.value.trim().length >= 2) showSuggestions(destinationEl.value);
+  });
+
+  destinationEl.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    searchResorts();
   });
 
   // Input veya dropdown dışında tıklanırsa önerileri gizle
@@ -2455,7 +3101,7 @@ function initSmartSearch() {
 }
 
 // Otel arama yap: şehri bul ve city.html'e yönlendir
-function searchResorts() {
+async function searchResorts() {
   const destination = (document.getElementById("destination")?.value || "").trim();
   const checkIn = document.getElementById("checkIn")?.value || "";
   const checkOut = document.getElementById("checkOut")?.value || "";
@@ -2474,7 +3120,7 @@ function searchResorts() {
   renderChipList("recentSearches", getRecentSearches()); // Chip listesini güncelle
 
   // Destinasyon adını şehir slug'ına dönüştür
-  const matchedCity = resolveCitySlug(destination);
+  const matchedCity = await resolveCitySlugForSearch(destination);
 
   // Eşleşme bulunamadıysa uyar
   if (!matchedCity) {
@@ -2498,12 +3144,14 @@ function searchResorts() {
 }
 
 // Sayfa tamamen yüklendiğinde tüm başlatma işlevlerini çalıştır
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // Tema değiştirme butonunu başlat
   initThemeToggle();
   initLoginModal();
   initSignupModal();
   initAuthButtons();
+
+  await syncCatalogFromApi();
 
   const pageParams = new URLSearchParams(window.location.search);
   if (pageParams.get('openSignup') === '1') {
@@ -2564,4 +3212,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // About sayfasının tüm etkileşimlerini başlat
   initAboutMePage();
+});
+
+window.addEventListener('storage', async (event) => {
+  if (event.key !== CATALOG_REFRESH_STORAGE_KEY) return;
+
+  const synced = await syncCatalogFromApi();
+  if (!synced) return;
+
+  renderCityPage();
+  loadRegions();
+  loadHotels();
+  loadCityTestimonials();
 });

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; img-src 'self' data: https:; connect-src 'self' http://localhost:5000 https://localhost:5000 https://localhost:5443; frame-ancestors 'none'; base-uri 'self';">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TatilRezerve | Bakım Modu</title>
+  <meta name="api-base" content="">
+  <link rel="icon" type="image/png" href="img/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Archivo:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/maintenance.css">
+</head>
+<body>
+  <div class="maint-bg" aria-hidden="true">
+    <ul class="maint-bg-track" id="maintenanceSliderTrack">
+      <li class="maint-bg-slide is-active" style="background-image:url('img/anthero.jpg')"></li>
+      <li class="maint-bg-slide" style="background-image:url('img/bodhero.jpg')"></li>
+      <li class="maint-bg-slide" style="background-image:url('img/rizhero.jpg')"></li>
+      <li class="maint-bg-slide" style="background-image:url('img/istreg.jpg')"></li>
+      <li class="maint-bg-slide" style="background-image:url('img/burhero.jpg')"></li>
+      <li class="maint-bg-slide" style="background-image:url('img/diyhero.jpg')"></li>
+    </ul>
+    <div class="maint-bg-overlay"></div>
+  </div>
+
+  <main class="maint-stage">
+    <section class="maint-card" data-autoplay-interval="4500">
+      <div class="maint-card-head">
+        <img src="img/logo.png" alt="TatilRezerve" class="maint-card-logo">
+        <div class="maint-card-titles">
+          <span id="maintenanceStatusText" class="maint-card-badge">Bakım Modu Aktif</span>
+          <h1 class="maint-card-title">Bakım Modunda</h1>
+        </div>
+      </div>
+
+      <p id="maintenanceMessage" class="maint-card-text">
+        Sistem şu anda bakımda. Erişim için yetkili anahtarını girin veya daha sonra tekrar deneyin.
+      </p>
+
+      <form id="maintenanceKeyForm" class="maint-card-form" autocomplete="off">
+        <label for="maintenanceKeyInput" class="maint-card-label">Erişim Anahtarı</label>
+        <div class="maint-card-row">
+          <input id="maintenanceKeyInput" type="password" placeholder="TRZ-xxxxxxxxxx" required autocomplete="off">
+          <button id="maintenanceSubmitBtn" type="submit" class="maint-card-btn">Erişim</button>
+        </div>
+        <p id="maintenanceErrorText" class="maint-card-error" role="alert"></p>
+      </form>
+
+      <div class="maint-card-footer">
+        <button id="maintenanceContinueBtn" class="maint-card-link hidden" type="button">Ana Sayfaya Dön</button>
+        <span class="maint-card-note">Güvenlik notu: Anahtar sistem tarafından kontrol edilir.</span>
+      </div>
+
+      <div class="maint-card-dots" id="maintenanceSliderDots" aria-hidden="true"></div>
+    </section>
+  </main>
+
+  <script src="assets/js/maintenance.js"></script>
+</body>
+</html>

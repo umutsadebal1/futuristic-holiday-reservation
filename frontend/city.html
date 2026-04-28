@@ -2,19 +2,25 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; img-src 'self' data: https:; connect-src 'self'; frame-src 'self' https://www.google.com https://maps.google.com https://www.google.com/maps; frame-ancestors 'none'; base-uri 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; img-src 'self' data: https:; connect-src 'self' http://localhost:5000 https://localhost:5000 https://localhost:5443; frame-src 'self' https://www.google.com https://maps.google.com https://www.google.com/maps; frame-ancestors 'none'; base-uri 'self';">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="cityPageTitle">Şehir Detayı - TatilRez</title>
+    <meta name="api-base" content="">
     <link rel="icon" type="image/png" href="img/logo.png">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/experience.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+    <script src="assets/js/maintenance-guard.js" defer></script>
 </head>
 <body class="page-city">
     <div id="helloCountdownBar" class="hello-bar">
         <div class="hello-bar-content">
-            <strong>Bugüne Özel Fırsatlar</strong>
-            <span>Bu şehirdeki seçili otellerde indirim bitimine kalan süre: <b id="campaignCountdown">--:--:--</b></span>
-            <button type="button" id="openCampaignCenterBtn" class="hello-bar-btn">Kampanya Detayı</button>
+            <div class="hello-bar-main">
+                <strong>Bugüne Özel Fırsatlar</strong>
+                <span>Bu şehirdeki seçili otellerde indirim bitimine kalan süre: <b id="campaignCountdown">--:--:--</b></span>
+                <button type="button" id="openCampaignCenterBtn" class="hello-bar-btn">Kampanya Detayı</button>
+            </div>
+            <button type="button" id="closeHelloBarBtn" class="hello-bar-close" aria-label="Kampanya şeridini kapat" title="Kapat">&times;</button>
         </div>
     </div>
 

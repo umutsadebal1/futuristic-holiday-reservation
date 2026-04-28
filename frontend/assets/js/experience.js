@@ -201,6 +201,19 @@
     window.setInterval(update, 1000);
   }
 
+  function initHelloBarDismiss() {
+    const helloBar = document.getElementById('helloCountdownBar');
+    const closeBtn = document.getElementById('closeHelloBarBtn');
+
+    if (!helloBar || !closeBtn || closeBtn.dataset.bound === 'true') return;
+
+    closeBtn.addEventListener('click', () => {
+      helloBar.classList.add('hidden');
+    });
+
+    closeBtn.dataset.bound = 'true';
+  }
+
   function getCampaignById(id) {
     return CAMPAIGNS.find((campaign) => campaign.id === id) || null;
   }
@@ -1609,6 +1622,7 @@
     initStaticModalClosers();
     initGlobalOverlayClose();
     initCountdown();
+    initHelloBarDismiss();
 
     initHotelCardDelegation();
 

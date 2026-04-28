@@ -153,6 +153,16 @@ npm run dev
 
 PostgreSQL must be running and backend environment variables should be configured securely in your local or deployment environment.
 
+### 4. Production with PM2
+
+```bash
+cd backend
+npm install
+npx pm2 start ecosystem.config.cjs --env production
+```
+
+For reverse proxy deployments, keep the backend on `127.0.0.1:5000` and expose it through Nginx or Caddy on `80/443`.
+
 --- 
 
 <a id="screenshots"></a>

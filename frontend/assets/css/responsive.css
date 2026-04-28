@@ -1,0 +1,501 @@
+/* ==========================================================================
+   responsive.css — global mobile/tablet overlay
+   This file is loaded LAST and overrides layout for narrow viewports.
+   Touches the major UI patterns shared across index/city/reservations/aboutme/admin-login.
+   ========================================================================== */
+
+/* === Universal sane defaults === */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+body {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Touch targets: nothing under 44px */
+button,
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-login,
+.btn-signup,
+.btn-search,
+.btn-submit,
+.btn-book,
+.section-link,
+.section-link-button,
+.filter-tag,
+.search-tab,
+.promo-action {
+  min-height: 36px;
+}
+
+/* === Tablet (≤ 1024px) === */
+@media (max-width: 1024px) {
+  .nav-links {
+    gap: 0.85rem;
+  }
+
+  .hero-slider-container,
+  .slider-item {
+    min-height: 420px;
+  }
+
+  .slider-content h1 {
+    font-size: clamp(1.6rem, 4vw, 2.6rem) !important;
+  }
+
+  .deep-explore-grid,
+  .personalized-grid,
+  .campaign-grid,
+  .promo-rail,
+  .footer-columns,
+  .trust-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+  }
+
+  .regions-cascade-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-auto-rows: minmax(200px, auto) !important;
+  }
+
+  .contact-content {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem;
+  }
+
+  .modal-content,
+  .booking-wizard-modal,
+  .hotel-detail-modal-content {
+    width: min(94vw, 720px) !important;
+    max-width: 94vw !important;
+    max-height: 92vh !important;
+    overflow-y: auto;
+  }
+
+  .section-block,
+  .contact,
+  .popular-regions,
+  .campaign-center,
+  .trust-legal {
+    padding-left: 1.4rem;
+    padding-right: 1.4rem;
+  }
+}
+
+/* === Mobile (≤ 768px) === */
+@media (max-width: 768px) {
+  /* Hello / countdown bar */
+  .hello-bar-content {
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0.5rem 0.6rem;
+    text-align: center;
+  }
+  .hello-bar-main {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .hello-bar-btn {
+    width: 100%;
+    margin-top: 0.3rem;
+  }
+
+  /* Header / navbar — collapse into stacked layout */
+  .header,
+  .navbar {
+    position: relative;
+  }
+  .navbar {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+    padding: 0.6rem 0.9rem !important;
+  }
+  .logo img {
+    height: 60px !important;
+    margin-right: 0 !important;
+  }
+  .nav-links {
+    order: 3;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 0.85rem !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    padding-top: 0.5rem;
+    margin-top: 0.4rem;
+  }
+  .nav-links a {
+    font-size: 0.92rem;
+  }
+  .header-actions {
+    gap: 0.5rem !important;
+  }
+  .auth-buttons-container,
+  .auth-links {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  /* Hero */
+  .hero,
+  .hero-slider-container,
+  .slider-item {
+    min-height: 360px !important;
+  }
+  .slider-content {
+    padding: 0 1.2rem !important;
+  }
+  .slider-content h1 {
+    font-size: clamp(1.4rem, 6.5vw, 2rem) !important;
+    line-height: 1.15 !important;
+  }
+  .slider-content p {
+    font-size: 0.95rem !important;
+  }
+  .slider-nav {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1rem !important;
+  }
+
+  /* Search box */
+  .search-container,
+  .product-search-shell {
+    margin-top: -2.4rem !important;
+  }
+  .search-box,
+  .ets-like-search-box {
+    padding: 0.9rem !important;
+    border-radius: 18px !important;
+  }
+  .search-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+    gap: 0.4rem !important;
+    padding-bottom: 0.3rem;
+    scrollbar-width: thin;
+  }
+  .search-tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 0.5rem 0.95rem !important;
+    font-size: 0.85rem !important;
+  }
+  .search-panel {
+    grid-template-columns: 1fr !important;
+    gap: 0.55rem !important;
+  }
+  .search-field {
+    width: 100% !important;
+  }
+  .search-field.wide {
+    grid-column: span 1 !important;
+  }
+  .btn-search {
+    width: 100%;
+    padding: 0.85rem 1.2rem !important;
+  }
+
+  /* Section-level — single column grids */
+  .deep-explore-grid,
+  .personalized-grid,
+  .campaign-grid,
+  .promo-rail,
+  .footer-columns,
+  .trust-grid,
+  .regions-cascade-grid,
+  .recent-viewed-list,
+  .payment-flex-cards {
+    grid-template-columns: 1fr !important;
+    grid-auto-rows: auto !important;
+    gap: 0.85rem !important;
+  }
+  .promo-rail {
+    grid-auto-flow: row !important;
+  }
+
+  /* Section spacing */
+  .section-block,
+  .contact,
+  .popular-regions,
+  .campaign-center,
+  .trust-legal,
+  .recent-viewed,
+  .promo-showcase,
+  .explore-depth,
+  .personalized-block {
+    padding: 1.4rem 1rem !important;
+  }
+  .section-heading-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.45rem;
+  }
+
+  /* Cards generic */
+  .promo-card,
+  .trust-card,
+  .info-card,
+  .campaign-card,
+  .region-card,
+  .city-card,
+  .hotel-card,
+  .destination-card,
+  .recent-viewed-card,
+  .deep-explore-card,
+  .personalized-card {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Filter chips */
+  .regions-filter {
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+    gap: 0.4rem !important;
+    padding-bottom: 0.4rem;
+  }
+  .filter-tag {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* Modals */
+  .modal-content,
+  .booking-wizard-modal,
+  .hotel-detail-modal-content {
+    width: 96vw !important;
+    max-width: 96vw !important;
+    max-height: 94vh !important;
+    margin: 2vh auto !important;
+    padding: 1.1rem !important;
+    border-radius: 16px !important;
+    overflow-y: auto;
+  }
+  .booking-stepper {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .booking-stepper li {
+    font-size: 0.78rem !important;
+    padding: 0.3rem 0.6rem !important;
+  }
+  .booking-step-actions {
+    flex-direction: column-reverse !important;
+    gap: 0.5rem !important;
+  }
+  .booking-step-actions button {
+    width: 100%;
+  }
+  .installment-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .installment-table {
+    min-width: 480px;
+  }
+
+  /* Forms */
+  .contact-form,
+  .booking-step-panel,
+  .form-group {
+    grid-template-columns: 1fr !important;
+  }
+  .contact-form input,
+  .contact-form textarea,
+  .booking-step-panel input,
+  .booking-step-panel select,
+  .booking-step-panel textarea,
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100% !important;
+    font-size: 16px !important; /* iOS no-zoom */
+  }
+  .contact-form .btn-submit,
+  .booking-step-actions .btn-book {
+    width: 100%;
+  }
+
+  /* Footer */
+  .footer-columns {
+    text-align: center;
+  }
+  .footer-bottom-row {
+    flex-direction: column;
+    gap: 0.4rem;
+    text-align: center;
+    padding: 0.9rem 1rem !important;
+  }
+
+  /* Floating help button */
+  .floating-help-btn {
+    bottom: 1rem !important;
+    right: 1rem !important;
+    padding: 0.6rem 0.9rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Carousel nav inside cramped sections */
+  .carousel-nav,
+  .campaign-nav {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* === City detail page === */
+  .city-hero,
+  .city-hero-banner {
+    min-height: 280px !important;
+    padding: 1.4rem 1rem !important;
+  }
+  .city-hero h1,
+  .city-hero-banner h1 {
+    font-size: clamp(1.4rem, 6vw, 2rem) !important;
+  }
+  .hotel-list,
+  .hotels-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* === Reservations page === */
+  .reservations-shell,
+  .reservations-layout,
+  .reservation-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  .reservation-card,
+  .reservation-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  /* === About me page === */
+  .aboutme-shell,
+  .about-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    padding: 1.2rem 1rem !important;
+  }
+  .about-card,
+  .aboutme-card {
+    padding: 1.1rem !important;
+  }
+
+  /* === Admin login === */
+  .admin-login-shell {
+    flex-direction: column !important;
+    padding: 1rem !important;
+    gap: 1rem !important;
+    min-height: 100vh;
+  }
+  .admin-login-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1.4rem 1.2rem !important;
+    border-radius: 18px !important;
+  }
+  .admin-login-showcase {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 200px !important;
+    border-radius: 18px !important;
+  }
+  .back-link,
+  .theme-toggle-btn {
+    position: relative !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    margin-bottom: 0.4rem;
+  }
+  .admin-login-card h1 {
+    font-size: 1.35rem !important;
+  }
+  .admin-login-form input,
+  .admin-login-form button {
+    width: 100% !important;
+    font-size: 16px !important;
+  }
+}
+
+/* === Small mobile (≤ 480px) === */
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0.5rem 0.7rem !important;
+  }
+  .logo img {
+    height: 52px !important;
+  }
+  .nav-links a {
+    font-size: 0.86rem;
+  }
+  .btn-login,
+  .btn-signup {
+    padding: 0.45rem 0.75rem !important;
+    font-size: 0.82rem !important;
+  }
+
+  .slider-content h1 {
+    font-size: 1.35rem !important;
+  }
+  .slider-content p {
+    font-size: 0.85rem !important;
+  }
+
+  .section-heading-row h2 {
+    font-size: 1.1rem !important;
+  }
+
+  .promo-card,
+  .trust-card,
+  .info-card,
+  .campaign-card {
+    padding: 0.95rem !important;
+    border-radius: 14px !important;
+  }
+
+  .modal-content {
+    padding: 0.9rem !important;
+    border-radius: 14px !important;
+  }
+
+  .filter-tag,
+  .search-tab {
+    padding: 0.4rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* === Wide screens — keep things from getting too big === */
+@media (min-width: 1600px) {
+  .navbar,
+  .section-block,
+  .contact,
+  .footer-columns,
+  .hero-slider-container {
+    max-width: 1500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* === Reduce motion === */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

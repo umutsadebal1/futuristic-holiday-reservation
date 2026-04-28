@@ -4,18 +4,24 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; img-src 'self' data: https:; connect-src 'self' http://localhost:5000 https://localhost:5000 https://localhost:5443; frame-ancestors 'none'; base-uri 'self';">
     <title>TatilRezerve - Türkiye'nin En İyi Tatil Yerleri</title>
+    <meta name="api-base" content="">
     <link rel="icon" type="image/png" href="img/logo.png">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/experience.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+    <script src="assets/js/maintenance-guard.js" defer></script>
 </head>
 <body class="page-home">
     <div id="helloCountdownBar" class="hello-bar">
         <div class="hello-bar-content">
-            <strong>Erken Rezervasyon Fırsatı</strong>
-            <span>Seçili otellerde ekstra %20 indirim için kalan süre: <b id="campaignCountdown">--:--:--</b></span>
-            <button type="button" id="openCampaignCenterBtn" class="hello-bar-btn">Kampanyaları İncele</button>
+            <div class="hello-bar-main">
+                <strong>Erken Rezervasyon Fırsatı</strong>
+                <span>Seçili otellerde ekstra %20 indirim için kalan süre: <b id="campaignCountdown">--:--:--</b></span>
+                <button type="button" id="openCampaignCenterBtn" class="hello-bar-btn">Kampanyaları İncele</button>
+            </div>
+            <button type="button" id="closeHelloBarBtn" class="hello-bar-close" aria-label="Kampanya şeridini kapat" title="Kapat">&times;</button>
         </div>
     </div>
 

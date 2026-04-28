@@ -977,6 +977,15 @@ body.dark-mode .nav-links a {
     background: rgba(255, 23, 68, 0.12);
 }
 
+.user-dropdown-admin {
+    background: linear-gradient(135deg, rgba(12, 110, 128, 0.12), rgba(22, 167, 142, 0.08));
+    border: 1px solid rgba(12, 110, 128, 0.25);
+}
+
+.user-dropdown-admin:hover {
+    background: linear-gradient(135deg, rgba(12, 110, 128, 0.22), rgba(22, 167, 142, 0.16));
+}
+
 .user-dropdown-icon {
     width: 1rem;
     height: 1rem;
@@ -1034,6 +1043,15 @@ body.dark-mode .user-dropdown-item {
 
 body.dark-mode .user-dropdown-item:hover {
     background: rgba(255, 23, 68, 0.22);
+}
+
+body.dark-mode .user-dropdown-admin {
+    background: linear-gradient(135deg, rgba(0, 127, 153, 0.28), rgba(0, 188, 212, 0.16));
+    border-color: rgba(96, 208, 228, 0.35);
+}
+
+body.dark-mode .user-dropdown-admin:hover {
+    background: linear-gradient(135deg, rgba(0, 127, 153, 0.42), rgba(0, 188, 212, 0.26));
 }
 
 body.dark-mode .user-dropdown-separator {
@@ -2403,6 +2421,162 @@ body.dark-mode .hotel-card {
 .hotel-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.hotel-portal-panel {
+    position: fixed;
+    right: 1rem;
+    top: 50%;
+    width: min(360px, calc(100vw - 2rem));
+    transform: translateY(-50%) scale(0.92);
+    opacity: 0;
+    pointer-events: none;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(12, 110, 128, 0.2);
+    background: radial-gradient(circle at 15% 20%, rgba(143, 249, 210, 0.55), rgba(9, 43, 62, 0.95));
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.25);
+    z-index: 1200;
+    transition: opacity 0.25s ease, transform 0.28s ease;
+}
+
+.hotel-portal-panel.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) scale(1);
+}
+
+.hotel-portal-ring,
+.hotel-portal-core {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hotel-portal-ring {
+    width: 250px;
+    height: 250px;
+    top: -120px;
+    right: -80px;
+    border: 2px solid rgba(186, 255, 240, 0.5);
+    animation: portalPulse 2.8s ease-in-out infinite;
+}
+
+.hotel-portal-core {
+    width: 180px;
+    height: 180px;
+    top: -84px;
+    right: -44px;
+    background: radial-gradient(circle, rgba(211, 255, 244, 0.86), rgba(29, 121, 143, 0.12));
+    filter: blur(0.5px);
+    animation: portalSpin 9s linear infinite;
+}
+
+.hotel-portal-content {
+    position: relative;
+    z-index: 1;
+    padding: 1rem 1rem 1.1rem;
+    color: #ecfffb;
+    backdrop-filter: blur(4px);
+}
+
+.hotel-portal-kicker {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.72rem;
+    color: rgba(226, 255, 248, 0.88);
+}
+
+.hotel-portal-content h3 {
+    margin: 0.35rem 0;
+    font-size: 1.24rem;
+}
+
+.hotel-portal-meta {
+    margin: 0 0 0.9rem;
+    font-size: 0.86rem;
+    color: rgba(240, 255, 251, 0.88);
+}
+
+.hotel-portal-gallery {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.55rem;
+}
+
+.hotel-portal-thumb {
+    margin: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(188, 255, 242, 0.28);
+}
+
+.hotel-portal-thumb.lead {
+    grid-column: 1 / -1;
+}
+
+.hotel-portal-thumb img {
+    width: 100%;
+    height: 92px;
+    object-fit: cover;
+    display: block;
+}
+
+.hotel-portal-thumb.lead img {
+    height: 136px;
+}
+
+.hotel-portal-thumb figcaption {
+    font-size: 0.76rem;
+    padding: 0.34rem 0.42rem 0.4rem;
+    color: rgba(238, 255, 250, 0.92);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@keyframes portalPulse {
+    0%,
+    100% {
+        transform: scale(0.88);
+        opacity: 0.4;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+@keyframes portalSpin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .hotel-portal-panel {
+        inset: auto 0.7rem 0.7rem 0.7rem;
+        width: auto;
+        top: auto;
+        transform: translateY(16px) scale(0.98);
+    }
+
+    .hotel-portal-panel.show {
+        transform: translateY(0) scale(1);
+    }
+
+    .hotel-portal-thumb img {
+        height: 82px;
+    }
+
+    .hotel-portal-thumb.lead img {
+        height: 110px;
+    }
 }
 
 body.dark-mode .hotel-card:hover {

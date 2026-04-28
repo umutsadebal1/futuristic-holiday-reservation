@@ -47,13 +47,25 @@
 }
 
 .hello-bar-content {
+    position: relative;
     max-width: 1280px;
     margin: 0 auto;
+    min-height: 40px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    justify-content: center;
+    gap: 0.9rem;
+    padding-left: 2.8rem;
+    padding-right: 2.8rem;
+}
+
+.hello-bar-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
     flex-wrap: wrap;
+    text-align: center;
 }
 
 .hello-bar-content b {
@@ -67,6 +79,34 @@
     border-radius: 999px;
     padding: 0.35rem 0.8rem;
     cursor: pointer;
+}
+
+.hello-bar-close {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: transparent;
+    color: #fff;
+    border-radius: 999px;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.hello-bar-close:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.hello-bar-close:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
 }
 
 .product-search-shell {
@@ -1171,6 +1211,15 @@ body.dark-mode .map-legend-item.active {
 }
 
 @media (max-width: 860px) {
+    .hello-bar-content {
+        padding-left: 2.4rem;
+        padding-right: 2.4rem;
+    }
+
+    .hello-bar-main {
+        gap: 0.6rem;
+    }
+
     .search-panel,
     .search-panel.active {
         grid-template-columns: 1fr 1fr;

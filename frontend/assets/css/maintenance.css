@@ -1,0 +1,332 @@
+:root {
+  --maint-text: #f4f7ff;
+  --maint-muted: rgba(244, 247, 255, 0.78);
+  --maint-soft: rgba(244, 247, 255, 0.6);
+  --maint-accent: #ff6b6b;
+  --maint-accent-warm: #ff8a5b;
+  --maint-card-bg: rgba(15, 24, 42, 0.55);
+  --maint-card-border: rgba(255, 255, 255, 0.18);
+  --maint-shadow: 0 30px 80px rgba(8, 14, 28, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  font-family: 'Space Grotesk', 'Poppins', sans-serif;
+  color: var(--maint-text);
+  background: #0b1426;
+  overflow: hidden;
+  position: relative;
+}
+
+/* === Full-screen slider arkaplan === */
+.maint-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.maint-bg-track {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  inset: 0;
+}
+
+.maint-bg-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: scale(1.08);
+  transition: opacity 1.2s ease, transform 7s ease;
+  will-change: opacity, transform;
+}
+
+.maint-bg-slide.is-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.maint-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(8, 14, 28, 0.35) 0%, rgba(8, 14, 28, 0.55) 60%, rgba(8, 14, 28, 0.75) 100%),
+    radial-gradient(circle at 22% 18%, rgba(255, 107, 107, 0.18), transparent 55%),
+    radial-gradient(circle at 80% 90%, rgba(44, 120, 255, 0.18), transparent 55%);
+}
+
+/* === Stage === */
+.maint-stage {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 2rem 1.2rem 3rem;
+}
+
+/* === Tek card (info + key) === */
+.maint-card {
+  width: min(560px, 100%);
+  background: var(--maint-card-bg);
+  border: 1px solid var(--maint-card-border);
+  border-radius: 24px;
+  padding: 1.7rem 1.8rem 1.4rem;
+  box-shadow: var(--maint-shadow);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  display: grid;
+  gap: 1rem;
+}
+
+.maint-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+}
+
+.maint-card-logo {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+
+.maint-card-titles {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.maint-card-badge {
+  align-self: start;
+  padding: 0.22rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 107, 107, 0.18);
+  border: 1px solid rgba(255, 107, 107, 0.45);
+  color: #ffb4b4;
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.maint-card-title {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #fff;
+}
+
+.maint-card-text {
+  margin: 0;
+  color: var(--maint-muted);
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+.maint-card-form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.maint-card-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--maint-soft);
+}
+
+.maint-card-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.55rem;
+}
+
+.maint-card-row input {
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(8, 14, 28, 0.45);
+  color: #fff;
+  font-size: 1rem;
+  font-family: inherit;
+  letter-spacing: 0.04em;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.maint-card-row input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.maint-card-row input:focus {
+  outline: none;
+  border-color: rgba(255, 138, 91, 0.7);
+  background: rgba(8, 14, 28, 0.65);
+  box-shadow: 0 0 0 4px rgba(255, 138, 91, 0.18);
+}
+
+.maint-card-btn {
+  border: none;
+  border-radius: 14px;
+  padding: 0 1.5rem;
+  background: linear-gradient(135deg, var(--maint-accent), var(--maint-accent-warm));
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  box-shadow: 0 12px 26px rgba(255, 107, 107, 0.32);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+  white-space: nowrap;
+}
+
+.maint-card-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px rgba(255, 107, 107, 0.38);
+}
+
+.maint-card-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+  transform: none;
+}
+
+.maint-card-error {
+  margin: 0;
+  min-height: 1.05rem;
+  color: #ff8b8b;
+  font-size: 0.86rem;
+}
+
+.maint-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.maint-card-link {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.maint-card-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.maint-card-note {
+  font-size: 0.78rem;
+  color: var(--maint-soft);
+  flex: 1;
+  text-align: right;
+  min-width: 0;
+}
+
+.maint-card-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  padding-top: 0.5rem;
+}
+
+.maint-card-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.maint-card-dot.is-active {
+  width: 22px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--maint-accent), var(--maint-accent-warm));
+  border-color: rgba(255, 255, 255, 0.85);
+}
+
+.hidden {
+  display: none;
+}
+
+/* === Responsive === */
+@media (max-width: 720px) {
+  .maint-stage {
+    align-items: center;
+    padding: 1.2rem 0.9rem 2rem;
+  }
+
+  .maint-card {
+    padding: 1.4rem 1.2rem 1.1rem;
+    border-radius: 20px;
+  }
+
+  .maint-card-title {
+    font-size: 1.3rem;
+  }
+
+  .maint-card-row {
+    grid-template-columns: 1fr;
+  }
+
+  .maint-card-btn {
+    padding: 0.85rem 1.4rem;
+  }
+
+  .maint-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .maint-card-note {
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .maint-card-head {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+
+  .maint-card-titles {
+    text-align: center;
+    justify-items: center;
+  }
+}
