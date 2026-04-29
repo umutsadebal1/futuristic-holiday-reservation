@@ -1287,7 +1287,7 @@
         const dateB = b.time ? new Date(b.time).getTime() : 0;
         return dateB - dateA;
       })
-      .slice(0, 5);
+      .slice(0, 10);
 
     if (!rows.length) {
       body.innerHTML = '<tr><td colspan="3" class="empty-row">Gosterilecek kayit yok.</td></tr>';
