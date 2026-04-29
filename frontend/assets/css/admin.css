@@ -418,11 +418,20 @@
 }
 
 .admin-panel {
-  display: none;
+  display: none !important;
 }
 
 .admin-panel.active {
-  display: block;
+  display: block !important;
+}
+
+/* Dashboard widgets only visible inside the active dashboardPanel */
+.admin-panel:not(#dashboardPanel) .dashboard-bottom-row,
+.admin-panel:not(#dashboardPanel) .recent-records-card,
+.admin-panel:not(#dashboardPanel) .activity-log-card,
+.admin-panel:not(#dashboardPanel) .mini-chart-card,
+.admin-panel:not(#dashboardPanel) .dashboard-note {
+  display: none !important;
 }
 
 /* small switch used for module toggles */

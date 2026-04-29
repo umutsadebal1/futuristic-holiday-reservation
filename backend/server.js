@@ -1775,17 +1775,8 @@ async function verifyGoogleHumanCheckToken(token, remoteIp) {
 }
 
 async function seedApiIntegrationsIfEmpty() {
-  const countResult = await pool.query('SELECT COUNT(*)::int AS count FROM api_integrations');
-  const count = Number(countResult.rows[0]?.count) || 0;
-  if (count > 0) return;
-
-  await pool.query(
-    `
-      INSERT INTO api_integrations (name, base_url, health_path, is_enabled, last_status, last_message, last_checked_at, updated_at)
-      VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-    `,
-    ['Core Backend API', `http://localhost:${PORT}`, '/api/health', true, 'unknown', 'Ilk kontrol bekleniyor.']
-  );
+  // Intentionally empty: avoid seeding a localhost-pointing API row in production.
+  // Admin can add real integrations from the panel.
 }
 
 async function getUsers() {
