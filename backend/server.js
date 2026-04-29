@@ -1798,8 +1798,18 @@ async function verifyGoogleHumanCheckToken(token, remoteIp) {
 }
 
 async function seedApiIntegrationsIfEmpty() {
-  // Intentionally empty: avoid seeding a localhost-pointing API row in production.
-  // Admin can add real integrations from the panel.
+  const appUrl = process.env.APP_URL;
+  if (!appUrl) return;
+
+  const { rows } = await pool.query('SELECT COUNT(*) FROM api_integrations');
+  if (parseInt(rows[0].count, 10) > 0) return;
+
+  await pool.query(
+    `INSERT INTO api_integrations (name, base_url, health_path, is_enabled, last_status, last_checked_at)
+     VALUES ($1, $2, $3, true, 'unknown', NOW())`,
+    ['TatilRez Core API', appUrl, '/coreapi/health']
+  );
+  console.log('[seed] Core API integration registered:', appUrl);
 }
 
 async function getUsers() {
