@@ -47,12 +47,12 @@ async function main() {
   const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
   const sidebarPermissions = SIDEBAR_KEYS;
 
-  const existing = await pool.query('SELECT id, email FROM users WHERE LOWER(email) = $1 LIMIT 1', [email]);
+  const existing = await pool.query('SELECT id, email FROM app_users WHERE LOWER(email) = $1 LIMIT 1', [email]);
 
   if (existing.rows.length) {
     const userId = existing.rows[0].id;
     await pool.query(
-      `UPDATE users
+      `UPDATE app_users
          SET password_hash = $1,
              name = $2,
              role = $3,
@@ -65,8 +65,8 @@ async function main() {
     console.log('\x1b[32m[ok]\x1b[0m mevcut kullanici guncellendi. id=' + userId);
   } else {
     const inserted = await pool.query(
-      `INSERT INTO users (email, name, password_hash, role, sidebar_permissions, is_active, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, TRUE, NOW(), NOW())
+      `INSERT INTO app_users (email, name, password_hash, role, sidebar_permissions, is_active, registered_at, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, TRUE, NOW(), NOW(), NOW())
        RETURNING id`,
       [email, name, hash, role, sidebarPermissions]
     );
