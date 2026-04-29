@@ -496,7 +496,7 @@
 .dashboard-bottom-row .activity-log-card .table-wrap {
   flex: 1;
   overflow-y: auto;
-  max-height: 220px;
+  max-height: 440px;
 }
 
 .dashboard-bottom-row .recent-records-card .admin-table {
