@@ -1,381 +1,312 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="tr">
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' https://unpkg.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self';">
-  <title>Umut Sadebal!!!</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self';">
+  <title>Umut Sadebal · Hakkımda</title>
   <meta name="api-base" content="">
-    <link rel="icon" type="image/png" href="img/logo.png">
-
-  <link rel="stylesheet" href="assets/css/aboutme.css">
-  <link rel="stylesheet" href="assets/css/responsive.css">
+  <link rel="icon" type="image/png" href="img/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/aboutme.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
   <script src="assets/js/maintenance-guard.js" defer></script>
 </head>
-
 <body>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow-1" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow-2" aria-hidden="true"></div>
+  <div class="bg-noise" aria-hidden="true"></div>
 
-  <main>
+  <a href="/" class="back-home" title="Ana Sayfa">
+    <ion-icon name="arrow-back-outline"></ion-icon>
+    <span>Ana Sayfa</span>
+  </a>
 
-     <aside class="sidebar" data-sidebar>
+  <main class="shell">
 
-      <div class="sidebar-info">
-
-        <figure class="avatar-box">
-          <img src="./img/my-avatar.jpeg" alt="Umut Sadebal" width="80">
-        </figure>
-
-        <div class="info-content">
-          <h1 class="name" title="Umut Sadebal">Umut Sadebal</h1>
-
-          <p class="title">Web Designer</p>
-        </div>
-
-        <button class="info_more-btn" data-sidebar-btn>
-          <span>İletişim</span>
-
-          <ion-icon name="chevron-down"></ion-icon>
-        </button>
-
+    <aside class="card profile-card">
+      <div class="avatar-wrap">
+        <div class="avatar-ring"></div>
+        <img src="./img/my-avatar.jpeg" alt="Umut Sadebal" class="avatar">
+        <span class="status-dot"></span>
       </div>
 
-      <div class="sidebar-info_more">
+      <h1 class="name">Umut Sadebal</h1>
+      <p class="role">
+        <span class="role-tag">Fullstack Developer</span>
+      </p>
 
-        <div class="separator"></div>
+      <p class="tagline">
+        <span class="tagline-prefix">&gt;</span>
+        Modern dünyayı ekranın arkasında kuruyorum.
+      </p>
 
-        <ul class="contacts-list">
+      <ul class="meta-list">
+        <li>
+          <span class="meta-icon"><ion-icon name="mail-outline"></ion-icon></span>
+          <a href="mailto:umutsadebal@gmail.com">umutsadebal@gmail.com</a>
+        </li>
+        <li>
+          <span class="meta-icon"><ion-icon name="call-outline"></ion-icon></span>
+          <a href="tel:+995384674010">+90 538 467 40 10</a>
+        </li>
+        <li>
+          <span class="meta-icon"><ion-icon name="location-outline"></ion-icon></span>
+          <span>Serik · Antalya · TR</span>
+        </li>
+        <li>
+          <span class="meta-icon"><ion-icon name="calendar-outline"></ion-icon></span>
+          <time datetime="2005-01-11">11 Ocak 2005</time>
+        </li>
+      </ul>
 
-          <li class="contact-item">
-
-            <div class="icon-box">
-              <ion-icon name="mail-outline"></ion-icon>
-            </div>
-
-            <div class="contact-info">
-              <p class="contact-title">Email</p>
-
-              <a href="mailto:umutsadebal@gmail.com" class="contact-link">umutsadebal@gmail.com</a>
-            </div>
-
-          </li>
-
-          <li class="contact-item">
-
-            <div class="icon-box">
-              <ion-icon name="phone-portrait-outline"></ion-icon>
-            </div>
-
-            <div class="contact-info">
-              <p class="contact-title">Telefon</p>
-
-              <a href="tel:+995384674010" class="contact-link">+99 5384674010</a>
-            </div>
-
-          </li>
-
-          <li class="contact-item">
-
-            <div class="icon-box">
-              <ion-icon name="calendar-outline"></ion-icon>
-            </div>
-
-            <div class="contact-info">
-              <p class="contact-title">Doğum günü</p>
-
-              <time datetime="1982-06-23">11 Ocak 2005</time>
-            </div>
-
-          </li>
-
-          <li class="contact-item">
-
-            <div class="icon-box">
-              <ion-icon name="location-outline"></ion-icon>
-            </div>
-
-            <div class="contact-info">
-              <p class="contact-title">Konum</p>
-
-              <address>Serik, Antalya, Türkiye</address>
-            </div>
-
-          </li>
-
-        </ul>
-
-        <div class="separator"></div>
-
-        <ul class="social-list">
-          <li class="social-item">
-            <a href="#https://x.com/lidergriffin?s=21" class="social-link">
-              <ion-icon name="logo-twitter"></ion-icon>
-            </a>
-          </li>
-
-          <li class="social-item">
-            <a href="#https://www.instagram.com/umut.sadebal?igsh=MWdud3F6aTc3enR2Mw%3D%3D&utm_source=qr" class="social-link">
-              <ion-icon name="logo-instagram"></ion-icon>
-            </a>
-          </li>
-
-        </ul>
-
+      <div class="social-row">
+        <a href="https://x.com/lidergriffin" class="social" target="_blank" rel="noopener" title="X / Twitter">
+          <ion-icon name="logo-twitter"></ion-icon>
+        </a>
+        <a href="https://www.instagram.com/umut.sadebal" class="social" target="_blank" rel="noopener" title="Instagram">
+          <ion-icon name="logo-instagram"></ion-icon>
+        </a>
+        <a href="https://github.com/umutsadebal1" class="social" target="_blank" rel="noopener" title="GitHub">
+          <ion-icon name="logo-github"></ion-icon>
+        </a>
       </div>
-
     </aside>
 
+    <section class="card content-card">
+      <nav class="tabs" role="tablist">
+        <button class="tab active" data-tab="about" role="tab" aria-selected="true">
+          <ion-icon name="person-outline"></ion-icon>
+          <span>Hakkımda</span>
+        </button>
+        <button class="tab" data-tab="resume" role="tab" aria-selected="false">
+          <ion-icon name="school-outline"></ion-icon>
+          <span>Eğitim & Yetenek</span>
+        </button>
+        <button class="tab" data-tab="portfolio" role="tab" aria-selected="false">
+          <ion-icon name="briefcase-outline"></ion-icon>
+          <span>Portföy</span>
+        </button>
+      </nav>
 
+      <article class="panel active" data-panel="about">
+        <h2 class="panel-title">
+          <span class="title-bar"></span>
+          Kim bu adam?
+        </h2>
 
+        <p class="lead">
+          Ben <strong>Umut Sadebal</strong>. Diyarbakır kökenli, şu anda Antalya'da yaşayan,
+          web'i kullanıcı için yeniden tasarlayan bir <span class="hl">Fullstack yolcusuyum</span>.
+        </p>
 
+        <p>
+          HTML, CSS ve JavaScript ile başladığım yolculukta artık karmaşık fikirleri sade,
+          akıcı ve görsel olarak çarpıcı arayüzlere dönüştürüyorum. Amacım her projede
+          markanın hikayesini, kullanıcı için bir <em>deneyime</em> çevirmek.
+        </p>
 
-    <!--
-      - #main-content
-    -->
-
-    <div class="main-content">
-
-      <!--
-        - #NAVBAR
-      -->
-
-     <nav class="navbar">
-  <ul class="navbar-list">
-    <li class="navbar-item">
-        <button type="button" class="navbar-link active" data-nav-link="about">Hakkımda</button>
-    </li>
-    <li class="navbar-item">
-        <button type="button" class="navbar-link" data-nav-link="resume">Eğitim ve Yetenek</button>
-    </li>
-    <li class="navbar-item">
-        <button type="button" class="navbar-link" data-nav-link="portfolio">Portföyüm</button>
-    </li>
-  </ul>
-</nav>
-
-
-
-
-      <!--
-        - #ABOUT
-      -->
-
-      <article class="about active" data-page="about">
-
-        <header>
-          <h2 class="h2 article-title">Hakkımda</h2>
-        </header>
-
-        <section class="about-text">
-          <p>
-           Ben Umut Sadebal, 
-           Diyarbakır merkezli bir Fullstack yolcusuyum. HTML, CSS ve JavaScript kullanarak modern dünyayı ekranın arkasında tasarlıyorum.
-          </p>
-
-          <p>
-            İşlevsel, kullanıcı odaklı ve görsel olarak çarpıcı dijital ürünler geliştiriyorum. 
-            Amacım, karmaşık fikirleri basit ve etkileyici arayüzlere dönüştürerek markanızın hikayesini en yaratıcı yolla anlatmak.
-            Yavaşça uzmanlaştığım bu yolda markanızı kişisel bir estetik anlayışıyla birleştirip, akılda kalıcı kullanıcı deneyimleri tasarlıyorum
-          </p>
-        </section>
-
-
-        <!--
-          - service
-        -->
-
-        <section class="service">
-
-          <h3 class="h3 service-title">Peki ben ne yapıyorum??? </h3>
-
-          <ul class="service-list">
-
-            <li class="service-item">
-              <div class="service-content-box">
-                <h4 class="h4 service-item-title">Web tasarımı</h4>
-
-                <p class="service-item-text">
-                    Web tasarımında, kullanıcı deneyimini ön planda tutarak, estetik ve işlevselliği bir araya getiriyorum. 
-                    Modern tasarım trendlerini takip ederek, markanızın dijital varlığını güçlendirecek özgün ve etkileyici web siteleri oluşturuyorum.
-                </p>
-              </div>
-
-            </li>
-          </ul>
-
-        </section>
-        <section class="clients">
-
-          <h3 class="h3 clients-title">Aktif olarak kullanabildiğim diller</h3>
-
-          <ul class="clients-list has-scrollbar">
-
-            <li class="clients-item">
-              <a href="#">
-                <img src="./img/html.png" alt="html logo">
-              </a>
-            </li>
-
-            <li class="clients-item">
-              <a href="#">
-                <img src="./img/css.png" alt="css logo">
-              </a>
-            </li>
-
-            <li class="clients-item">
-              <a href="#">
-                <img src="./img/js.png" alt="js logo">
-              </a>
-            </li>
-          </ul>
-
-        </section>
-
-      </article>
-
-
-
-
-
-      <!--
-        - #RESUME
-      -->
-
-      <article class="resume" data-page="resume">
-
-        <header>
-          <h2 class="h2 article-title">Eğitim ve Yetenek</h2>
-        </header>
-
-        <section class="timeline">
-
-          <div class="title-wrapper">
-            <div class="icon-box">
-              <ion-icon name="book-outline"></ion-icon>
-            </div>
-
-            <h3 class="h3">Eğitim</h3>
+        <div class="stat-grid">
+          <div class="stat">
+            <span class="stat-value">3+</span>
+            <span class="stat-label">Yıl deneyim</span>
           </div>
-
-          <ol class="timeline-list">
-
-            <li class="timeline-item">
-
-              <h4 class="h4 timeline-item-title">Diyarbakır Yenişehir İlk Öğretim okulu</h4>
-
-              <span>2012-2016</span>
-
-              <p class="timeline-text">
-                Eğitim hayatıma ilk olarak <strong>Yenişehir İlköğretim Okulu</strong>'nda başladım. 
-                Burada aldığım temel eğitim, bugün kurduğum bu düzenin ilk kıvılcımı oldu.
-              </p>
-
-            </li>
-
-            <li class="timeline-item">
-
-              <h4 class="h4 timeline-item-title">Şehit Namık Tümer Ortaokulu</h4>
-
-              <span>2016-2020</span>
-
-              <p class="timeline-text">
-                Temel eğitimimin ardından ortaöğrenim hayatıma <strong>Şehit Namık Tümer Ortaokulu</strong>'nda devam ettim.
-                Bu dönem, hayata dair bir şeyleri öğrenmeye başladığım, merakımın arttığı ve kendimi keşfetmeye başladığım bir süreçti.
-              </p>
-
-            </li>
-
-            <li class="timeline-item">
-
-              <h4 class="h4 timeline-item-title">Diyarbakır Özel Final Fen Lisesi</h4>
-
-              <span>2020-2024</span>
-
-              <p class="timeline-text">
-                <strong>Diyarbakır Özel Final Fen Lisesi</strong> bünyesinde aldığım eğitim, mühendislik ve yazılım dünyasına olan ilgimin akademik temellerle birleştiği dönüm noktası oldu.
-                bu süreçte, Tubitak için geliştirdiğim TubiForum projesi ile ikinci aşamaya kadar yükselerek, bu alandaki yeteneklerimi ve tutkumun meyvelerini görme fırsatı buldum.
-              </p>
-
-            </li>
-
-               <li class="timeline-item">
-
-              <h4 class="h4 timeline-item-title">Antalya Belek Üniversitesi</h4>
-
-              <span>2024-2028</span>
-
-              <p class="timeline-text">
-                Şu anda <strong>Antalya Belek Üniversitesi</strong>'nde Yönetim Bilişim Sistemleri bölümünde eğitimime devam ediyorum. 
-                Burada, hem yönetim hem de bilişim alanlarında derinlemesine bilgi edinerek, gelecekteki kariyer hedeflerime sağlam bir temel oluşturmayı amaçlıyorum.
-                Üniversite hayatım boyunca, hem akademik başarılarımı artırmayı hem de sektörel deneyimler kazanarak kendimi geliştirmeyi hedefliyorum.
-              </p>
-
-            </li>
-
-          </ol>
-
-        </section>
-        <section class="skill">
-
-          <h3 class="h3 skills-title">Yeteneklerim</h3>
-
-          <ul class="skills-list content-card">
-
-            <li class="skills-item">
-
-              <div class="title-wrapper">
-                <h5 class="h5">Web design</h5>
-                <data value="75">75%</data>
-              </div>
-
-              <div class="skill-progress-bg">
-                <div class="skill-progress-fill" style="width: 75%;"></div>
-              </div>
-
-            </li>
-          </ul>
-
-        </section>
-
-      </article>
-
-      <article class="portfolio" data-page="portfolio">
-
-        <header>
-          <h2 class="h2 article-title">Portföyüm</h2>
-        </header>
-            <li class="project-item  active" data-filter-item data-category="web design">
-              <a href="#">
-
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-
-                  <img src="./img/tatilrez.png" alt="Tatil Rezervasyon Otomasyonu" loading="lazy">
-                </figure>
-
-                <h3 class="project-title" href="index.html">Tatil Rezervasyon Otomasyonu</h3>
-
-                <p class="project-category">Web Tasarım</p>
-
-              </a>
-            </li>
-            </ul>
-        </section>
-      </article>
+          <div class="stat">
+            <span class="stat-value">10+</span>
+            <span class="stat-label">Tamamlanan proje</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">∞</span>
+            <span class="stat-label">Tasarım iterasyonu</span>
+          </div>
         </div>
+
+        <h3 class="section-title">Ne yapıyorum?</h3>
+        <ul class="services">
+          <li class="service">
+            <div class="service-icon"><ion-icon name="color-palette-outline"></ion-icon></div>
+            <div>
+              <h4>Web Tasarımı</h4>
+              <p>Modern, kullanıcı odaklı ve estetik dijital ürünler kuruyorum.
+                Tasarım sistemleri, mikro-etkileşimler, marka kimliği.</p>
+            </div>
+          </li>
+          <li class="service">
+            <div class="service-icon"><ion-icon name="code-slash-outline"></ion-icon></div>
+            <div>
+              <h4>Frontend Geliştirme</h4>
+              <p>HTML, CSS, JavaScript ile responsive ve hızlı arayüzler.
+                Performans, erişilebilirlik, SEO temel öncelik.</p>
+            </div>
+          </li>
+          <li class="service">
+            <div class="service-icon"><ion-icon name="server-outline"></ion-icon></div>
+            <div>
+              <h4>Backend & Veritabanı</h4>
+              <p>Node.js / Express, PostgreSQL, REST API tasarımı,
+                kimlik doğrulama, dağıtım otomasyonu.</p>
+            </div>
+          </li>
+        </ul>
+
+        <h3 class="section-title">Aktif kullanabildiğim diller</h3>
+        <div class="stack">
+          <span class="chip"><ion-icon name="logo-html5"></ion-icon> HTML5</span>
+          <span class="chip"><ion-icon name="logo-css3"></ion-icon> CSS3</span>
+          <span class="chip"><ion-icon name="logo-javascript"></ion-icon> JavaScript</span>
+          <span class="chip"><ion-icon name="logo-nodejs"></ion-icon> Node.js</span>
+          <span class="chip"><ion-icon name="server-outline"></ion-icon> PostgreSQL</span>
+          <span class="chip"><ion-icon name="git-branch-outline"></ion-icon> Git</span>
+        </div>
+      </article>
+
+      <article class="panel" data-panel="resume">
+        <h2 class="panel-title">
+          <span class="title-bar"></span>
+          Eğitim & Yetenek
+        </h2>
+
+        <h3 class="section-title">
+          <ion-icon name="book-outline"></ion-icon>
+          Eğitim Hattım
+        </h3>
+
+        <ol class="timeline">
+          <li class="timeline-item">
+            <span class="timeline-dot"></span>
+            <div class="timeline-content">
+              <span class="timeline-period">2024 — 2028</span>
+              <h4>Antalya Belek Üniversitesi</h4>
+              <p>Yönetim Bilişim Sistemleri. Hem yönetim hem bilişim
+                disiplinlerini birleştirip kariyer hedeflerime sağlam bir temel kuruyorum.</p>
+            </div>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-dot"></span>
+            <div class="timeline-content">
+              <span class="timeline-period">2020 — 2024</span>
+              <h4>Diyarbakır Özel Final Fen Lisesi</h4>
+              <p>Yazılım ve mühendisliğe akademik temel. <strong>TÜBİTAK</strong> için
+                geliştirdiğim <em>TubiForum</em> projesi ile <strong>2. aşamaya</strong> yükseldim.</p>
+            </div>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-dot"></span>
+            <div class="timeline-content">
+              <span class="timeline-period">2016 — 2020</span>
+              <h4>Şehit Namık Tümer Ortaokulu</h4>
+              <p>Hayata dair sorular sormaya, merak etmeye ve kendimi
+                keşfetmeye başladığım dönem.</p>
+            </div>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-dot"></span>
+            <div class="timeline-content">
+              <span class="timeline-period">2012 — 2016</span>
+              <h4>Diyarbakır Yenişehir İlköğretim</h4>
+              <p>İlk kıvılcım. Bugün kurduğum bu düzenin ilk satır kodu.</p>
+            </div>
+          </li>
+        </ol>
+
+        <h3 class="section-title">
+          <ion-icon name="flash-outline"></ion-icon>
+          Yetenek Çubukları
+        </h3>
+
+        <div class="skills">
+          <div class="skill">
+            <div class="skill-row">
+              <span>Web Tasarımı</span><span>85%</span>
+            </div>
+            <div class="skill-bar"><span style="--w: 85%"></span></div>
+          </div>
+          <div class="skill">
+            <div class="skill-row">
+              <span>Frontend (HTML/CSS/JS)</span><span>80%</span>
+            </div>
+            <div class="skill-bar"><span style="--w: 80%"></span></div>
+          </div>
+          <div class="skill">
+            <div class="skill-row">
+              <span>Node.js / Express</span><span>70%</span>
+            </div>
+            <div class="skill-bar"><span style="--w: 70%"></span></div>
+          </div>
+          <div class="skill">
+            <div class="skill-row">
+              <span>PostgreSQL</span><span>65%</span>
+            </div>
+            <div class="skill-bar"><span style="--w: 65%"></span></div>
+          </div>
+          <div class="skill">
+            <div class="skill-row">
+              <span>Git / Deploy</span><span>75%</span>
+            </div>
+            <div class="skill-bar"><span style="--w: 75%"></span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel" data-panel="portfolio">
+        <h2 class="panel-title">
+          <span class="title-bar"></span>
+          Portföy
+        </h2>
+
+        <div class="projects">
+          <a href="/" class="project">
+            <div class="project-thumb">
+              <img src="./img/tatilrez.png" alt="TatilRezerve" loading="lazy">
+              <span class="project-overlay">
+                <ion-icon name="open-outline"></ion-icon>
+              </span>
+            </div>
+            <div class="project-info">
+              <h4>TatilRezerve</h4>
+              <p>Tatil rezervasyon otomasyonu — fullstack proje.</p>
+              <div class="project-tags">
+                <span>Node.js</span>
+                <span>PostgreSQL</span>
+                <span>JWT</span>
+                <span>HTTPS</span>
+              </div>
+            </div>
+          </a>
+
+          <div class="project project-empty">
+            <div class="project-thumb empty-thumb">
+              <ion-icon name="add-circle-outline"></ion-icon>
+            </div>
+            <div class="project-info">
+              <h4>Yakında</h4>
+              <p>Yeni bir şey demleniyor.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
   </main>
 
-
-  <script src="assets/js/app.js"></script>
-  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  <script>
+    document.querySelectorAll('.tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.getAttribute('data-tab');
+        document.querySelectorAll('.tab').forEach((t) => {
+          t.classList.toggle('active', t === tab);
+          t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+        });
+        document.querySelectorAll('.panel').forEach((p) => {
+          p.classList.toggle('active', p.getAttribute('data-panel') === target);
+        });
+      });
+    });
+  </script>
 </body>
-
 </html>

@@ -183,6 +183,33 @@ app.use('/api', maintenanceGuard);
 app.use('/api', moduleKillSwitchMiddleware);
 app.use(staticMaintenanceGate);
 app.use('/uploads', express.static(uploadRoot));
+
+const CLEAN_URL_ROUTES = {
+  '/admin':         'admin-login.html',
+  '/login':         'admin-login.html',
+  '/admin-login':   'admin-login.html',
+  '/panel':         'admin.html',
+  '/admin-panel':   'admin.html',
+  '/dashboard':     'admin.html',
+  '/hakkimda':      'aboutme.html',
+  '/about':         'aboutme.html',
+  '/rezervasyonlar': 'reservations.html',
+  '/rezervasyon':   'reservations.html',
+  '/sehir':         'city.html',
+  '/city':          'city.html'
+};
+
+Object.entries(CLEAN_URL_ROUTES).forEach(([url, file]) => {
+  app.get(url, (_req, res) => res.sendFile(path.join(FRONTEND_DIR, file)));
+});
+
+app.get('/index.html', (_req, res) => res.redirect(301, '/'));
+
+app.get(/^\/[^/.]+\.html$/, (req, res, next) => {
+  if (req.path === '/maintenance.html') { next(); return; }
+  res.redirect(301, req.path.replace(/\.html$/, ''));
+});
+
 app.use(express.static(FRONTEND_DIR, { index: 'index.html', extensions: ['html'] }));
 app.get('/', (_req, res) => {
   res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
@@ -1310,15 +1337,19 @@ async function loadFrontendSeedData() {
   const citiesFile = path.join(__dirname, '..', 'frontend', 'assets', 'js', 'cities.js');
   const hotelsFile = path.join(__dirname, '..', 'frontend', 'assets', 'js', 'hotels.js');
 
-  const [citiesCode, hotelsCode] = await Promise.all([
-    fs.readFile(citiesFile, 'utf8'),
-    fs.readFile(hotelsFile, 'utf8')
-  ]);
+  const tryRead = async (file) => {
+    try { return await fs.readFile(file, 'utf8'); } catch (_e) { return ''; }
+  };
+
+  const [citiesCode, hotelsCode] = await Promise.all([tryRead(citiesFile), tryRead(hotelsFile)]);
+  if (!citiesCode && !hotelsCode) {
+    return { cities: {}, hotelsByCity: {} };
+  }
 
   const sandbox = { window: {} };
   vm.createContext(sandbox);
-  vm.runInContext(citiesCode, sandbox, { filename: 'cities.js' });
-  vm.runInContext(hotelsCode, sandbox, { filename: 'hotels.js' });
+  if (citiesCode) vm.runInContext(citiesCode, sandbox, { filename: 'cities.js' });
+  if (hotelsCode) vm.runInContext(hotelsCode, sandbox, { filename: 'hotels.js' });
 
   return {
     cities: sandbox.window.CITIES || {},
