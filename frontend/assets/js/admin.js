@@ -1069,10 +1069,13 @@
       if (!registered.length) {
         registeredBody.innerHTML = '<tr><td colspan="7" class="empty-row">Kayitli kullanici bulunamadi.</td></tr>';
       } else {
+        const currentUserId = Number(state.currentUser?.id) || 0;
         registeredBody.innerHTML = registered.map((user) => {
           const isActive = user?.isActive === true;
           const role = normalizeUserRole(user?.role, USER_ROLES.KULLANICI);
           const canManage = canCurrentUserManageAccess();
+          const isSelf = currentUserId && Number(user.id) === currentUserId;
+          const canDelete = canManage && !isSelf;
           return ''
             + '<tr>'
             + '  <td><strong>' + escapeHtml(user?.name || '-') + '</strong></td>'
@@ -1081,7 +1084,12 @@
             + '  <td><span class="user-status-pill ' + (isActive ? 'active' : 'offline') + '">' + (isActive ? 'Aktif' : 'Pasif') + '</span></td>'
             + '  <td>' + escapeHtml(formatDateTime(user?.registeredAt)) + '</td>'
             + '  <td>' + escapeHtml(formatDateTime(user?.lastActiveAt || user?.lastLoginAt)) + '</td>'
-            + '  <td><button type="button" class="table-action-btn edit ' + (canManage ? '' : 'disabled') + '" data-user-action="select" data-user-id="' + user.id + '" ' + (canManage ? '' : 'disabled') + '>Rutbe Ver</button></td>'
+            + '  <td>'
+            + '    <div class="table-action-row">'
+            + '      <button type="button" class="table-action-btn edit ' + (canManage ? '' : 'disabled') + '" data-user-action="select" data-user-id="' + user.id + '" ' + (canManage ? '' : 'disabled') + '>Rutbe Ver</button>'
+            + '      <button type="button" class="table-action-btn delete ' + (canDelete ? '' : 'disabled') + '" data-user-action="delete" data-user-id="' + user.id + '" ' + (canDelete ? '' : 'disabled') + (isSelf ? ' title="Kendinizi silemezsiniz"' : '') + '>Sil</button>'
+            + '    </div>'
+            + '  </td>'
             + '</tr>';
         }).join('');
       }
@@ -1370,6 +1378,9 @@
     const imageInput = document.getElementById('cityImageInput');
     if (imageInput) imageInput.value = city.image || '';
 
+    const heroImageInput = document.getElementById('cityHeroImageInput');
+    if (heroImageInput) heroImageInput.value = city.heroImage || '';
+
     const heroInput = document.getElementById('cityHeroInput');
     if (heroInput) heroInput.value = city.heroBackground || '';
 
@@ -1438,6 +1449,7 @@
       slug: document.getElementById('citySlugInput')?.value?.trim() || '',
       description: document.getElementById('cityDescriptionInput')?.value?.trim() || '',
       image: document.getElementById('cityImageInput')?.value?.trim() || '',
+      heroImage: document.getElementById('cityHeroImageInput')?.value?.trim() || '',
       heroBackground: document.getElementById('cityHeroInput')?.value?.trim() || '',
       regionClass: document.getElementById('cityRegionClassInput')?.value?.trim() || '',
       showInRegions: Boolean(document.getElementById('cityShowInRegionsInput')?.checked),
@@ -1754,24 +1766,49 @@
     const usersBody = document.getElementById('registeredUsersTableBody');
     if (!usersBody) return;
 
-    usersBody.addEventListener('click', (event) => {
+    usersBody.addEventListener('click', async (event) => {
       const actionBtn = event.target.closest('[data-user-action]');
       if (!actionBtn) return;
 
       if (!canCurrentUserManageAccess()) {
-        showToast('Yetki atamasi sadece patron kullaniciya aciktir.', true);
+        showToast('Bu islem sadece patron kullaniciya aciktir.', true);
         return;
       }
 
       const action = actionBtn.getAttribute('data-user-action');
       const userId = Number(actionBtn.getAttribute('data-user-id') || 0);
-      if (action !== 'select' || !userId) return;
+      if (!action || !userId) return;
 
       const user = state.registeredUsers.find((entry) => Number(entry.id) === userId);
       if (!user) return;
 
-      fillUserAccessForm(user);
-      showToast('Kullanici secildi: ' + (user.name || user.email || 'Kullanici'));
+      if (action === 'select') {
+        fillUserAccessForm(user);
+        showToast('Kullanici secildi: ' + (user.name || user.email || 'Kullanici'));
+        return;
+      }
+
+      if (action === 'delete') {
+        if (Number(state.currentUser?.id) === userId) {
+          showToast('Kendinizi silemezsiniz.', true);
+          return;
+        }
+
+        const approved = await confirmAction(
+          'Kullaniciyi sil',
+          (user.name || user.email || 'Bu kullanici') + ' silinecek. Geri alinamaz. Devam edilsin mi?',
+          'Sil'
+        );
+        if (!approved) return;
+
+        try {
+          await requestJson('/api/admin/users/' + userId, { method: 'DELETE' });
+          showToast('Kullanici silindi.');
+          await refreshUsersData();
+        } catch (error) {
+          showToast(error.message, true);
+        }
+      }
     });
   }
 
@@ -1964,7 +2001,33 @@
           const payload = await uploadImage('cities', file);
           if (imageInput) imageInput.value = payload?.file?.path || '';
           if (statusText) statusText.textContent = 'Yukleme tamamlandi: ' + (payload?.file?.path || '-');
-          showToast('Sehir gorseli yuklendi.');
+          showToast('Sehir reg gorseli yuklendi.');
+        } catch (error) {
+          if (statusText) statusText.textContent = error.message;
+          showToast(error.message, true);
+        }
+      });
+    }
+
+    const uploadCityHeroImageBtn = document.getElementById('uploadCityHeroImageBtn');
+    if (uploadCityHeroImageBtn) {
+      uploadCityHeroImageBtn.addEventListener('click', async () => {
+        const fileInput = document.getElementById('cityHeroImageFileInput');
+        const heroInput = document.getElementById('cityHeroImageInput');
+        const statusText = document.getElementById('cityHeroUploadStatusText');
+        const file = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+
+        if (!file) {
+          if (statusText) statusText.textContent = 'Yukleme icin once bir dosya secin.';
+          return;
+        }
+
+        try {
+          if (statusText) statusText.textContent = 'Yukleniyor...';
+          const payload = await uploadImage('cities', file);
+          if (heroInput) heroInput.value = payload?.file?.path || '';
+          if (statusText) statusText.textContent = 'Yukleme tamamlandi: ' + (payload?.file?.path || '-');
+          showToast('Sehir hero gorseli yuklendi.');
         } catch (error) {
           if (statusText) statusText.textContent = error.message;
           showToast(error.message, true);

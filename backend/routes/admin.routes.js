@@ -117,6 +117,45 @@ function registerAdminRoutes(app, deps) {
     }
   });
 
+  app.delete('/api/admin/users/:id', async (req, res) => {
+    try {
+      const targetUserId = toPositiveInteger(req.params.id);
+      if (!targetUserId) {
+        res.status(400).json({ message: 'Gecerli bir kullanici id degeri girin.' });
+        return;
+      }
+
+      const actor = req.auth?.userId ? await getUserById(req.auth.userId) : null;
+      if (!actor) {
+        res.status(401).json({ message: 'Bu islem icin gecerli bir oturum gerekli.' });
+        return;
+      }
+
+      const actorRole = normalizeUserRole(actor.role, USER_ROLES.KULLANICI);
+      if (actorRole !== USER_ROLES.PATRON) {
+        res.status(403).json({ message: 'Kullanici silme islemini yalnizca patron yetkisi yapabilir.' });
+        return;
+      }
+
+      if (Number(actor.id) === targetUserId) {
+        res.status(400).json({ message: 'Kendinizi silemezsiniz.' });
+        return;
+      }
+
+      const targetUser = await getUserById(targetUserId);
+      if (!targetUser) {
+        res.status(404).json({ message: 'Kullanici bulunamadi.' });
+        return;
+      }
+
+      await pool.query('DELETE FROM app_users WHERE id = $1', [targetUserId]);
+      try { await insertActivityLog({ actorUserId: req.auth?.userId, actorEmail: req.auth?.email, action: 'delete_user', targetType: 'user', targetId: targetUserId, details: { email: targetUser.email, name: targetUser.name } }); } catch (_) {}
+      res.json({ message: 'Kullanici silindi.', userId: targetUserId });
+    } catch (error) {
+      handleApiError(res, error);
+    }
+  });
+
   app.get('/api/admin/modules', async (_req, res) => {
     try {
       const result = await pool.query(
@@ -333,8 +372,8 @@ function registerAdminRoutes(app, deps) {
 
       const inserted = await pool.query(
         `
-          INSERT INTO cities (slug, name, description, image, hero_background, region_class, show_in_regions, aliases, updated_at)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+          INSERT INTO cities (slug, name, description, image, hero_image, hero_background, region_class, show_in_regions, aliases, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
           RETURNING id
         `,
         [
@@ -342,6 +381,7 @@ function registerAdminRoutes(app, deps) {
           payload.name,
           payload.description,
           payload.image,
+          payload.heroImage,
           payload.heroBackground,
           payload.regionClass,
           payload.showInRegions,
@@ -358,6 +398,7 @@ function registerAdminRoutes(app, deps) {
             c.name,
             c.description,
             c.image,
+            c.hero_image,
             c.hero_background,
             c.region_class,
             c.show_in_regions,
@@ -400,6 +441,7 @@ function registerAdminRoutes(app, deps) {
         slug: req.body?.slug ?? row.slug,
         description: req.body?.description ?? row.description,
         image: String(req.body?.image || '').trim() ? req.body.image : row.image,
+        heroImage: req.body?.heroImage ?? row.hero_image,
         heroBackground: req.body?.heroBackground ?? row.hero_background,
         regionClass: req.body?.regionClass ?? row.region_class,
         showInRegions: req.body?.showInRegions ?? row.show_in_regions,
@@ -414,18 +456,20 @@ function registerAdminRoutes(app, deps) {
             name = $2,
             description = $3,
             image = $4,
-            hero_background = $5,
-            region_class = $6,
-            show_in_regions = $7,
-            aliases = $8,
+            hero_image = $5,
+            hero_background = $6,
+            region_class = $7,
+            show_in_regions = $8,
+            aliases = $9,
             updated_at = NOW()
-          WHERE id = $9
+          WHERE id = $10
         `,
         [
           payload.slug,
           payload.name,
           payload.description,
           payload.image,
+          payload.heroImage,
           payload.heroBackground,
           payload.regionClass,
           payload.showInRegions,
@@ -442,6 +486,7 @@ function registerAdminRoutes(app, deps) {
             c.name,
             c.description,
             c.image,
+            c.hero_image,
             c.hero_background,
             c.region_class,
             c.show_in_regions,

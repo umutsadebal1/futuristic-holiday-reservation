@@ -297,7 +297,7 @@
     if (description) description.textContent = campaign.description;
     if (code) code.textContent = campaign.code;
     if (link) {
-      link.href = 'city.html?city=' + encodeURIComponent(campaign.city) + '&campaign=' + encodeURIComponent(campaign.id);
+      link.href = '/sehir/' + encodeURIComponent(String(campaign.city || 'antalya').toLowerCase()) + '?campaign=' + encodeURIComponent(campaign.id);
       link.textContent = campaign.cta;
     }
 
@@ -423,7 +423,7 @@
             + cityPart
             + '      <span>' + toCurrency(item.price) + '/gece</span>'
             + '    </div>'
-            + '    <a href="city.html?city=' + encodeURIComponent(item.citySlug || 'antalya') + '&q=' + encodeURIComponent(item.name) + '" class="btn-secondary">Tekrar Gör</a>'
+            + '    <a href="/sehir/' + encodeURIComponent(String(item.citySlug || 'antalya').toLowerCase()) + '?q=' + encodeURIComponent(item.name) + '" class="btn-secondary">Tekrar Gör</a>'
             + '  </div>'
             + '</article>';
         }).join('')
@@ -904,8 +904,6 @@
 
   function navigateToCity(citySlug, extra) {
     const params = new URLSearchParams();
-    params.set('city', citySlug || 'antalya');
-
     const checkIn = document.getElementById('checkIn')?.value || '';
     const checkOut = document.getElementById('checkOut')?.value || '';
     const guests = document.getElementById('guests')?.value || '2';
@@ -919,11 +917,13 @@
     if (extra && typeof extra === 'object') {
       Object.keys(extra).forEach((key) => {
         const value = extra[key];
-        if (value) params.set(key, value);
+        if (value && key !== 'city') params.set(key, value);
       });
     }
 
-    window.location.href = 'city.html?' + params.toString();
+    const safeSlug = encodeURIComponent(String(citySlug || 'antalya').toLowerCase());
+    const qs = params.toString();
+    window.location.href = '/sehir/' + safeSlug + (qs ? '?' + qs : '');
   }
 
   function initSearchSubmit() {
@@ -1510,20 +1510,20 @@
 
     const cards = [
       {
-        title: 'Aile Tatili Onerileri',
-        text: 'Cocuk dostu havuzlu, kolay ulasimli sehir otelleri.',
+        title: 'Aile tatili önerileri',
+        text: 'Çocuk dostu havuzlu, kolay ulaşımlı şehir otelleri.',
         city: 'antalya',
         tag: 'Aile'
       },
       {
-        title: 'Balayi Koleksiyonu',
-        text: 'Ciftler icin romantik ve daha sakin tesis secimleri.',
+        title: 'Balayı Koleksiyonu',
+        text: 'Çiftler için romantik ve daha sakin tesis seçimleri.',
         city: 'mugla',
         tag: 'Balayi'
       },
       {
-        title: 'Sehir Kacamagı',
-        text: '2 gecelik hafta sonu planlari icin merkezi oteller.',
+        title: 'Şehir Kaçamağı',
+        text: '2 gecelik hafta sonu planları için merkezi oteller.',
         city: 'istanbul',
         tag: 'Hafta Sonu'
       }
@@ -1532,9 +1532,9 @@
     if (wishlist.length > 0) {
       cards.unshift({
         title: 'Favorilerine Göre',
-        text: 'Kaydettigin otellere benzer secenekleri one cikardik.',
+        text: 'Kaydettiğin otellere benzer seçenekleri öne çıkardık.',
         city: 'izmir',
-        tag: 'Kisisel'
+        tag: 'Kişisel'
       });
     }
 

@@ -67,7 +67,9 @@ const MAINTENANCE_PUBLIC_PATHS = new Set([
   '/img/diyhero.jpg',
   '/img/rizhero.jpg',
   '/img/istreg.jpg',
-  '/favicon.ico'
+  '/favicon.ico',
+  '/coreapi',
+  '/coreapi/health'
 ]);
 const MAINTENANCE_COOKIE_NAME = 'maintenanceAccessToken';
 
@@ -203,7 +205,23 @@ Object.entries(CLEAN_URL_ROUTES).forEach(([url, file]) => {
   app.get(url, (_req, res) => res.sendFile(path.join(FRONTEND_DIR, file)));
 });
 
+app.get('/sehir/:slug', (_req, res) => res.sendFile(path.join(FRONTEND_DIR, 'city.html')));
+app.get('/city/:slug',  (_req, res) => res.sendFile(path.join(FRONTEND_DIR, 'city.html')));
+
 app.get('/index.html', (_req, res) => res.redirect(301, '/'));
+
+const APP_BOOTED_AT = Date.now();
+const coreApiInfo = (req) => ({
+  name: 'TatilRezerve Core Backend API',
+  status: 'online',
+  version: '1.0.0',
+  scheme: req.protocol,
+  host: req.headers.host || '',
+  uptimeSeconds: Math.round((Date.now() - APP_BOOTED_AT) / 1000),
+  timestamp: new Date().toISOString()
+});
+app.get('/coreapi', (req, res) => res.json(coreApiInfo(req)));
+app.get('/coreapi/health', (req, res) => res.json(coreApiInfo(req)));
 
 const HTML_REDIRECT_OVERRIDES = {
   '/admin.html':       '/admin-panel',
@@ -212,8 +230,10 @@ const HTML_REDIRECT_OVERRIDES = {
 
 app.get(/^\/[^/.]+\.html$/, (req, res, next) => {
   if (req.path === '/maintenance.html') { next(); return; }
-  const target = HTML_REDIRECT_OVERRIDES[req.path] || req.path.replace(/\.html$/, '');
-  res.redirect(301, target);
+  const base = HTML_REDIRECT_OVERRIDES[req.path] || req.path.replace(/\.html$/, '');
+  const qIndex = req.url.indexOf('?');
+  const queryString = qIndex >= 0 ? req.url.substring(qIndex) : '';
+  res.redirect(301, base + queryString);
 });
 
 app.use(express.static(FRONTEND_DIR, { index: 'index.html', extensions: ['html'] }));
@@ -587,6 +607,7 @@ function buildCityPayload(input) {
     name,
     description: String(input?.description || '').trim(),
     image: String(input?.image || 'img/logo.png').trim() || 'img/logo.png',
+    heroImage: String(input?.heroImage || '').trim(),
     heroBackground: String(input?.heroBackground || DEFAULT_HERO_BACKGROUND).trim() || DEFAULT_HERO_BACKGROUND,
     regionClass: String(input?.regionClass || 'bottom-right').trim() || 'bottom-right',
     showInRegions: toBoolean(input?.showInRegions, false),
@@ -759,6 +780,7 @@ function mapCityRow(row) {
     name: row.name,
     description: row.description || '',
     image: row.image || 'img/logo.png',
+    heroImage: row.hero_image || '',
     heroBackground: row.hero_background || DEFAULT_HERO_BACKGROUND,
     regionClass: row.region_class || 'bottom-right',
     showInRegions: row.show_in_regions !== false,
@@ -1443,6 +1465,7 @@ async function getCitiesWithCounts() {
       c.name,
       c.description,
       c.image,
+      c.hero_image,
       c.hero_background,
       c.region_class,
       c.show_in_regions,

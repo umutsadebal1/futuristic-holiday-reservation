@@ -361,8 +361,7 @@ function searchFromSavedValue(value) {
 
   const matchedCity = resolveCitySlug(searchValue);
   if (matchedCity) {
-    const params = new URLSearchParams({ city: matchedCity, q: searchValue });
-    window.location.href = 'city.html?' + params.toString();
+    window.location.href = buildCityUrl(matchedCity, { q: searchValue });
     return;
   }
 
@@ -1428,7 +1427,7 @@ function buildRegionCatalog() {
         hotels: Number.isFinite(hotelsCount) ? hotelsCount : 0,
         image: city.image || 'img/logo.png',
         heroImage: resolveCityHeroImage(city),
-        link: 'city.html?city=' + encodeURIComponent(slug),
+        link: buildCityUrl(slug),
         class: city.regionClass || 'bottom-right'
       };
     });
@@ -1450,8 +1449,6 @@ function bindRegionFilterDelegation() {
     });
 
     const params = new URLSearchParams();
-    params.set('city', citySlug);
-
     const checkIn = document.getElementById('checkIn')?.value || '';
     const checkOut = document.getElementById('checkOut')?.value || '';
     const guests = document.getElementById('guests')?.value || '';
@@ -1462,7 +1459,7 @@ function bindRegionFilterDelegation() {
     if (guests) params.set('guests', guests);
     if (rooms) params.set('rooms', rooms);
 
-    window.location.href = 'city.html?' + params.toString();
+    window.location.href = buildCityUrl(citySlug, params);
   });
 
   filterWrap.dataset.bound = 'true';
@@ -2259,6 +2256,20 @@ function slugifyText(value) {
     .replace(/(^-|-$)/g, '');
 }
 
+function buildCityUrl(slug, extraParams) {
+  const safeSlug = encodeURIComponent(String(slug || 'antalya').toLowerCase());
+  let qs = '';
+  if (extraParams) {
+    const params = extraParams instanceof URLSearchParams
+      ? new URLSearchParams(extraParams.toString())
+      : new URLSearchParams(extraParams);
+    params.delete('city');
+    const text = params.toString();
+    if (text) qs = '?' + text;
+  }
+  return '/sehir/' + safeSlug + qs;
+}
+
 function resolveApiBaseUrl() {
   if (typeof window === 'undefined') return '';
   const meta = document.querySelector('meta[name="api-base"]');
@@ -2378,8 +2389,13 @@ function resolveCitySlug(input) {
   return "";
 }
 
-// URL'den şehir parametresi al ve çöz
+// URL'den şehir parametresi al ve çöz (path-first, sonra ?city=)
 function getCityFromQuery() {
+  const pathMatch = String(window.location.pathname || '').match(/^\/(?:sehir|city)\/([^/?#]+)/i);
+  if (pathMatch) {
+    const fromPath = resolveCitySlug(decodeURIComponent(pathMatch[1]));
+    if (fromPath) return fromPath;
+  }
   const params = new URLSearchParams(window.location.search);
   return resolveCitySlug(params.get("city"));
 }
@@ -3136,7 +3152,6 @@ async function searchResorts() {
 
   // URL parametreleri oluştur
   const params = new URLSearchParams({
-    city: matchedCity, // Şehir slug'ı
     q: destination,    // Orijinal arama metni
     checkIn,           // Giriş tarihi
     checkOut,          // Çıkış tarihi
@@ -3146,7 +3161,7 @@ async function searchResorts() {
   });
 
   // City sayfasına yönlendir
-  window.location.href = "city.html?" + params.toString();
+  window.location.href = buildCityUrl(matchedCity, params);
 }
 
 // Sayfa tamamen yüklendiğinde tüm başlatma işlevlerini çalıştır
