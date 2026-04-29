@@ -492,7 +492,8 @@
   font-size: 0.92rem;
 }
 
-.dashboard-bottom-row .recent-records-card .table-wrap {
+.dashboard-bottom-row .recent-records-card .table-wrap,
+.dashboard-bottom-row .activity-log-card .table-wrap {
   flex: 1;
   overflow-y: auto;
   max-height: 220px;
