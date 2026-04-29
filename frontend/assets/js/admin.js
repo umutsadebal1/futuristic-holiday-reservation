@@ -618,7 +618,7 @@
         : 'Islem basarisiz. Kod: ' + response.status;
       if (response.status === 401) {
         clearAuthStorage();
-        window.location.href = 'admin-login.html?denied=1';
+        window.location.href = '/admin?denied=1';
       }
       throw new Error(message);
     }
@@ -1789,7 +1789,7 @@
         }
 
         clearAuthStorage();
-        window.location.href = 'admin-login.html';
+        window.location.href = '/admin';
       });
     }
 
@@ -2194,7 +2194,7 @@
     try {
       await loadCurrentAdminProfile();
       if (!isAdminRole(state.currentUser?.role)) {
-        window.location.href = 'admin-login.html?denied=1';
+        window.location.href = '/admin?denied=1';
         return;
       }
       await Promise.all([refreshCatalogData(), refreshApiModules(), refreshApiIntegrations(), refreshUsersData(), refreshDashboardInsights(), refreshActivityLogs()]);

@@ -522,7 +522,7 @@ function initAdminLoginPage() {
       if (showcaseCopyTitle) showcaseCopyTitle.textContent = 'Hos Geldiniz';
       if (showcaseCopyBody) showcaseCopyBody.textContent = 'Hos geldiniz, ' + (user.name || user.email);
       window.setTimeout(() => {
-        window.location.href = 'admin.html';
+        window.location.href = '/admin-panel';
       }, 1200);
     } catch (error) {
       setFeedback(error.message || 'Admin dogrulamasi basarisiz oldu.', 'error');

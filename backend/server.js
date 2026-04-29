@@ -205,9 +205,15 @@ Object.entries(CLEAN_URL_ROUTES).forEach(([url, file]) => {
 
 app.get('/index.html', (_req, res) => res.redirect(301, '/'));
 
+const HTML_REDIRECT_OVERRIDES = {
+  '/admin.html':       '/admin-panel',
+  '/admin-login.html': '/admin'
+};
+
 app.get(/^\/[^/.]+\.html$/, (req, res, next) => {
   if (req.path === '/maintenance.html') { next(); return; }
-  res.redirect(301, req.path.replace(/\.html$/, ''));
+  const target = HTML_REDIRECT_OVERRIDES[req.path] || req.path.replace(/\.html$/, '');
+  res.redirect(301, target);
 });
 
 app.use(express.static(FRONTEND_DIR, { index: 'index.html', extensions: ['html'] }));

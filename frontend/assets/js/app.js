@@ -531,7 +531,7 @@ async function syncAdminMenuEntry() {
   if (!isAdminRole(role)) return;
 
   const separator = menu.querySelector('.user-dropdown-separator');
-  const html = '<a href="admin-login.html" id="openAdminLoginMenuBtn" class="user-dropdown-item user-dropdown-admin" data-menu-action="admin"><span class="user-dropdown-icon" aria-hidden="true">'
+  const html = '<a href="/admin" id="openAdminLoginMenuBtn" class="user-dropdown-item user-dropdown-admin" data-menu-action="admin"><span class="user-dropdown-icon" aria-hidden="true">'
     + getUserMenuIconSvg('admin') + '</span><span>Admin Girisi</span></a>';
 
   if (separator) {
