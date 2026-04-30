@@ -169,7 +169,7 @@
                     </div>
                     <div class="testimonials-carousel">
                         <div class="testimonials-track" id="cityTestimonialsTrack"></div>
-                        <button id="cityTestimonialPrevBtn" class="carousel-nav carousel-prev" type="button" aria-label="Onceki yorum">❮</button>
+                        <button id="cityTestimonialPrevBtn" class="carousel-nav carousel-prev" type="button" aria-label="Önceki yorum">❮</button>
                         <button id="cityTestimonialNextBtn" class="carousel-nav carousel-next" type="button" aria-label="Sonraki yorum">❯</button>
                     </div>
                 </section>
@@ -203,12 +203,12 @@
     <footer class="site-footer mega-footer">
         <div class="footer-columns">
             <div class="footer-col">
-                <h4>Urunler</h4>
+                <h4>Ürünler</h4>
                 <a href="#">Otel</a>
                 <a href="#">Tur</a>
-                <a href="#">Ucak</a>
+                <a href="#">Uçak</a>
                 <a href="#">Villa</a>
-                <a href="#">Otobus</a>
+                <a href="#">Otobüs</a>
             </div>
             <div class="footer-col">
                 <h4>Kurumsal</h4>
@@ -246,7 +246,7 @@
     <div id="bookingModal" class="modal">
         <div class="modal-content booking-wizard-modal">
             <span class="close" id="closeBookingModal">&times;</span>
-            <h2>Rezervasyonunuzu Tamamlayin</h2>
+            <h2>Rezervasyonunuzu Tamamlayın</h2>
 
             <ol class="booking-stepper" id="bookingStepper">
                 <li class="active">Bilgiler</li>
@@ -258,7 +258,7 @@
             <form id="bookingForm">
                 <div class="booking-step-panel active" data-step-panel="0">
                     <div class="form-group">
-                        <label>Tatil Yeri / Otel Adi</label>
+                        <label>Tatil Yeri / Otel Adı</label>
                         <input type="text" id="resortName" readonly>
                     </div>
                     <div class="form-group">
@@ -266,18 +266,18 @@
                         <input type="date" id="bookingCheckIn" required>
                     </div>
                     <div class="form-group">
-                        <label>Cikis Tarihi</label>
+                        <label>Çıkış Tarihi</label>
                         <input type="date" id="bookingCheckOut" required>
                     </div>
                     <div class="form-group">
-                        <label>Konuk Sayisi</label>
+                        <label>Konuk Sayısı</label>
                         <input type="number" id="bookingGuests" min="1" required>
                     </div>
                 </div>
 
                 <div class="booking-step-panel" data-step-panel="1">
                     <div class="form-group">
-                        <label>Tam Adiniz</label>
+                        <label>Tam Adınız</label>
                         <input type="text" id="guestName" required>
                     </div>
                     <div class="form-group">
@@ -298,7 +298,7 @@
                     <div class="form-group">
                         <label>Oda Tipi</label>
                         <select id="roomType" required>
-                            <option value="">Oda Tipi Secin</option>
+                            <option value="">Oda Tipi Seçin</option>
                             <option value="Standard">Standart Oda</option>
                             <option value="Deluxe">Deluxe Oda</option>
                             <option value="Suite">Suite</option>
@@ -317,14 +317,14 @@
                         <label class="payment-option-card">
                             <input type="radio" name="paymentPlan" value="half">
                             <div>
-                                <strong>Simdi %50, Kalani Sonra</strong>
+                                <strong>Şimdi %50, Kalanı Sonra</strong>
                                 <p>Check-in öncesi kalan ödeme tamamlama</p>
                             </div>
                         </label>
                     </div>
 
                     <div class="installment-table-wrap">
-                        <h4>Taksit Avantajlari</h4>
+                        <h4>Taksit Avantajları</h4>
                         <table class="installment-table">
                             <thead>
                                 <tr>
@@ -358,12 +358,12 @@
                     <div class="price-summary">
                         <p>Toplam Fiyat: <strong id="totalPrice">₺0</strong></p>
                     </div>
-                    <p class="final-confirm-copy">Rezervasyon bilgileriniz dogrulandiktan sonra onay e-postasi gonderilecektir.</p>
+                    <p class="final-confirm-copy">Rezervasyon bilgileriniz doğrulandıktan sonra onay e-postası gönderilecektir.</p>
                 </div>
 
                 <div class="booking-step-actions">
                     <button id="bookingPrevStepBtn" type="button" class="btn-secondary" disabled>Geri</button>
-                    <button id="bookingNextStepBtn" type="button" class="btn-secondary">Ileri</button>
+                    <button id="bookingNextStepBtn" type="button" class="btn-secondary">İleri</button>
                     <button id="bookingSubmitBtn" type="submit" class="btn-book hidden">Rezervasyonu Onayla</button>
                 </div>
             </form>
@@ -373,9 +373,9 @@
     <div id="hotelDetailModal" class="modal">
         <div class="modal-content hotel-detail-modal-content">
             <span class="close" id="closeHotelDetailModal">&times;</span>
-            <h2 id="hotelDetailTitle">Otel Detayi</h2>
+            <h2 id="hotelDetailTitle">Otel Detayı</h2>
             <div class="hotel-detail-gallery">
-                <img id="hotelDetailMainImage" src="img/logo.png" alt="Otel gorseli">
+                <img id="hotelDetailMainImage" src="img/logo.png" alt="Otel görseli">
                 <div id="hotelDetailThumbs" class="hotel-detail-thumbs"></div>
             </div>
             <div class="hotel-detail-grid">
@@ -398,7 +398,7 @@
     <div id="campaignDetailModal" class="modal">
         <div class="modal-content campaign-detail-modal-content">
             <span class="close" id="closeCampaignDetailModal">&times;</span>
-            <h2 id="campaignDetailTitle">Kampanya Detayi</h2>
+            <h2 id="campaignDetailTitle">Kampanya Detayı</h2>
             <p id="campaignDetailDescription"></p>
             <div class="campaign-coupon-box">
                 <span>Kod:</span>
@@ -459,7 +459,7 @@
     <div id="callMeModal" class="modal">
         <div class="modal-content call-me-modal-content">
             <span class="close" id="closeCallMeModal">&times;</span>
-            <h2>Sizi Arayalim</h2>
+            <h2>Sizi Arayalım</h2>
             <form id="callMeForm" class="call-me-form">
                 <div class="form-group">
                     <label>Ad Soyad</label>
@@ -477,7 +477,7 @@
                         <option value="15:00-18:00">15:00 - 18:00</option>
                     </select>
                 </div>
-                <button type="submit" class="btn-book">Geri Arama Talebi Olustur</button>
+                <button type="submit" class="btn-book">Geri Arama Talebi Oluştur</button>
             </form>
         </div>
     </div>

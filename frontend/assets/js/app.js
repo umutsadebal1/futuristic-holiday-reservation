@@ -79,17 +79,17 @@ const ACCOUNT_COUPONS = [
   {
     code: 'ERKEN20',
     title: 'Erken Rezervasyon %20',
-    detail: 'Secili sehir otellerinde ekstra indirim.'
+    detail: 'Seçili şehir otellerinde ekstra indirim.'
   },
   {
     code: 'TRAVEL500',
-    title: '20.000 TL Uzeri 500 TL',
-    detail: 'Kampanya merkezi kodu, sepet asamasinda uygulanir.'
+    title: '20.000 TL Üzeri 500 TL',
+    detail: 'Kampanya merkezi kodu, sepet aşamasında uygulanır.'
   },
   {
     code: 'UYE8',
-    title: 'Uye Fiyati Avantaji',
-    detail: 'Uye girisi yapan kullanicilar icin otomatik fiyat guncellemesi.'
+    title: 'Üye Fiyatı Avantajı',
+    detail: 'Üye girişi yapan kullanıcılar için otomatik fiyat güncellemesi.'
   }
 ];
 
@@ -284,7 +284,7 @@ function openProfileOverview() {
       }));
 
       initAuthButtons();
-      if (feedback) feedback.textContent = 'Profil bilgisi guncellendi.';
+      if (feedback) feedback.textContent = 'Profil bilgisi güncellendi.';
     });
   }
 }
@@ -336,7 +336,7 @@ function openCouponsOverview() {
 
 function renderSavedSearchListHtml(list) {
   if (!Array.isArray(list) || list.length === 0) {
-    return '<p class="account-feature-note">Henuz kayitli arama yok. Bir arama ekleyerek baslayabilirsin.</p>';
+    return '<p class="account-feature-note">Henüz kayıtlı arama yok. Bir arama ekleyerek başlayabilirsin.</p>';
   }
 
   return ''
@@ -394,7 +394,7 @@ function openSavedSearchesOverview() {
     + '  <div id="savedSearchListWrap">' + renderSavedSearchListHtml(getSavedSearches()) + '</div>'
     + '</div>';
 
-  openAccountFeatureModal('Kayitli Aramalarim', bodyHtml);
+  openAccountFeatureModal('Kayıtlı Aramalarım', bodyHtml);
 
   const listWrap = document.getElementById('savedSearchListWrap');
   const addBtn = document.getElementById('addSavedSearchBtn');
@@ -485,7 +485,7 @@ async function requestAuthGet(pathname) {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(data.message || 'Islem basarisiz.');
+    const error = new Error(data.message || 'İşlem başarısız.');
     error.status = response.status;
     throw error;
   }
@@ -862,7 +862,7 @@ async function requestAuthApi(pathname, payload) {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(data.message || 'Islem basarisiz.');
+    const error = new Error(data.message || 'İşlem başarısız.');
     error.status = response.status;
     throw error;
   }
@@ -1283,7 +1283,7 @@ function setActiveTestimonialCard(trackEl, activeIndex) {
 function getCityTestimonials(citySlug) {
   const safeSlug = citySlug && HOTEL_DATA[citySlug] ? citySlug : (Object.keys(HOTEL_DATA)[0] || 'antalya');
   const hotels = Array.isArray(HOTEL_DATA[safeSlug]) ? HOTEL_DATA[safeSlug] : [];
-  const cityName = (CITY_DATA[safeSlug] && CITY_DATA[safeSlug].name) ? CITY_DATA[safeSlug].name : 'Sehir';
+  const cityName = (CITY_DATA[safeSlug] && CITY_DATA[safeSlug].name) ? CITY_DATA[safeSlug].name : 'Şehir';
 
   return [0, 1, 2].map((index) => {
     const hotel = hotels[index] || hotels[0] || { name: cityName + ' Merkez Otel', rating: 4.5 };
@@ -1348,7 +1348,7 @@ const loadCityTestimonials = () => {
   if (!testimonialsTrack) return;
 
   const citySlug = getCityFromQuery() || getPathCitySlug() || 'antalya';
-  const cityName = (CITY_DATA[citySlug] && CITY_DATA[citySlug].name) ? CITY_DATA[citySlug].name : 'Sehir';
+  const cityName = (CITY_DATA[citySlug] && CITY_DATA[citySlug].name) ? CITY_DATA[citySlug].name : 'Şehir';
   const titleEl = document.getElementById('cityTestimonialsTitle');
   if (titleEl) titleEl.textContent = cityName + ' Konuk Yorumlari';
 
@@ -2062,7 +2062,7 @@ const cancelReservation = (index) => {
           cancelledTab.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        alert('Rezervasyon başarıyla iptal edildi. Iptaller sekmesine yonlendirildiniz.');
+        alert('Rezervasyon başarıyla iptal edildi. İptaller sekmesine yönlendirildiniz.');
     }
 };
 // Bir HTML elemanında "active" sınıfını aç/kapat
@@ -2328,7 +2328,7 @@ function applyCatalogPayload(payload) {
     if (!citySlug || !nextCityMap[citySlug]) return;
 
     const hotelItem = {
-      name: hotel.name || 'Isimsiz Otel',
+      name: hotel.name || 'İsimsiz Otel',
       image: hotel.image || 'img/logo.png',
       rating: Number(hotel.rating) || 0,
       price: Number(hotel.price) || 0,
@@ -2355,7 +2355,7 @@ async function syncCatalogFromApi() {
   try {
     const response = await fetch(buildApiUrl('/api/bootstrap'));
     if (!response.ok) {
-      throw new Error('Katalog API istegi basarisiz: ' + response.status);
+      throw new Error('Katalog API isteği başarısız: ' + response.status);
     }
 
     const payload = await response.json();
@@ -2420,7 +2420,7 @@ function renderCityPage() {
 
   // Şehir bulunamadıysa hata mesajı göster
   if (!city) {
-    cityNameEl.textContent = "Sehir bulunamadi";
+    cityNameEl.textContent = "Şehir bulunamadı";
     if (cityDescriptionEl) cityDescriptionEl.textContent = "Gecerli bir sehir secerek tekrar deneyin.";
     if (cityHotelsTitleEl) cityHotelsTitleEl.textContent = "Sonuc yok";
     if (hotelsGridEl) {
@@ -2433,7 +2433,7 @@ function renderCityPage() {
   const resolvedPageTitle = titleData?.pageTitle || (city.name + " Otelleri - TatilRez");
   const resolvedHeroTitle = titleData?.heroTitle || city.name;
   const resolvedHeroDescription = titleData?.heroDescription || city.description;
-  const resolvedHotelsTitle = titleData?.hotelsSectionTitle || (city.name + "'da Populer Oteller");
+  const resolvedHotelsTitle = titleData?.hotelsSectionTitle || (city.name + "'da Popüler Oteller");
 
   // Sayfaya başlıkları ve açıklamaları yerleştir
   document.title = resolvedPageTitle; // Tarayıcı sekmesi başlığı
@@ -2533,7 +2533,7 @@ function ensureHotelPortalPanel() {
     + '<div class="hotel-portal-core" aria-hidden="true"></div>'
     + '<div class="hotel-portal-content">'
     + '  <p class="hotel-portal-kicker">Portal View</p>'
-    + '  <h3 id="hotelPortalTitle">Otel Kesfi</h3>'
+    + '  <h3 id="hotelPortalTitle">Otel Keşfi</h3>'
     + '  <p id="hotelPortalMeta" class="hotel-portal-meta">Kartin uzerine gelerek onizleme ac.</p>'
     + '  <div id="hotelPortalGallery" class="hotel-portal-gallery"></div>'
     + '</div>';
@@ -2566,7 +2566,7 @@ function buildHotelPortalGallery(hotel, list) {
   const images = [];
   if (leadImage) {
     images.push({
-      name: hotel?.name || 'Secili Otel',
+      name: hotel?.name || 'Seçili Otel',
       image: leadImage
     });
   }
@@ -2617,9 +2617,9 @@ function bindHotelPortalInteractions(list) {
 
     const gallery = buildHotelPortalGallery(hotel, list);
 
-    if (titleEl) titleEl.textContent = hotel.name || 'Otel Kesfi';
+    if (titleEl) titleEl.textContent = hotel.name || 'Otel Keşfi';
     if (metaEl) {
-      metaEl.textContent = 'Puan: ' + (Number(hotel.rating) || 0).toFixed(1) + ' - Fiyat: ₺' + (Number(hotel.price) || 0) + ' - Portal galeri acik';
+      metaEl.textContent = 'Puan: ' + (Number(hotel.rating) || 0).toFixed(1) + ' - Fiyat: ₺' + (Number(hotel.price) || 0) + ' - Portal galeri açık';
     }
 
     if (galleryEl) {

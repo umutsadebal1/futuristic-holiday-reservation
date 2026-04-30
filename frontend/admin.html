@@ -30,31 +30,31 @@
 
       <nav class="sidebar-nav" aria-label="Admin bolumleri">
         <button type="button" class="sidebar-link active" data-panel-target="dashboardPanel" data-icon="DB">Dashboard</button>
-        <button type="button" class="sidebar-link" data-panel-target="citiesPanel" data-icon="SR">Sehir Yonetimi</button>
-        <button type="button" class="sidebar-link" data-panel-target="hotelsPanel" data-icon="OT">Otel Yonetimi</button>
-        <button type="button" class="sidebar-link" data-panel-target="apisPanel" data-icon="API">API Baglantilari</button>
-        <button type="button" class="sidebar-link" data-panel-target="usersPanel" data-icon="KL">Kullanicilar</button>
+        <button type="button" class="sidebar-link" data-panel-target="citiesPanel" data-icon="SR">Şehir Yönetimi</button>
+        <button type="button" class="sidebar-link" data-panel-target="hotelsPanel" data-icon="OT">Otel Yönetimi</button>
+        <button type="button" class="sidebar-link" data-panel-target="apisPanel" data-icon="API">API Bağlantıları</button>
+        <button type="button" class="sidebar-link" data-panel-target="usersPanel" data-icon="KL">Kullanıcılar</button>
       </nav>
 
-      <section class="sidebar-api-monitor" aria-label="API baglanti ozeti">
+      <section class="sidebar-api-monitor" aria-label="API bağlantı özeti">
         <div class="sidebar-api-head">
           <h3>API Durumu</h3>
           <button id="sidebarCheckApisBtn" type="button" class="sidebar-api-check-btn">Kontrol</button>
         </div>
         <ul id="sidebarApiList" class="sidebar-api-list">
-          <li class="sidebar-api-empty">API listesi yukleniyor...</li>
+          <li class="sidebar-api-empty">API listesi yükleniyor...</li>
         </ul>
-        <button type="button" class="sidebar-api-manage-btn" data-panel-target="apisPanel">API Bagla / Cikar</button>
+        <button type="button" class="sidebar-api-manage-btn" data-panel-target="apisPanel">API Bağla / Çıkar</button>
       </section>
 
-      <section class="sidebar-users-monitor" aria-label="Kullanici ozeti">
+      <section class="sidebar-users-monitor" aria-label="Kullanıcı özeti">
         <div class="sidebar-users-head">
-          <h3>Kullanicilar</h3>
+          <h3>Kullanıcılar</h3>
           <button id="sidebarRefreshUsersBtn" type="button" class="sidebar-users-check-btn">Yenile</button>
         </div>
         <div class="sidebar-users-metrics">
           <div class="sidebar-users-metric">
-            <span>Kayitli</span>
+            <span>Kayıtlı</span>
             <strong id="sidebarRegisteredUsersCount">0</strong>
           </div>
           <div class="sidebar-users-metric">
@@ -62,25 +62,25 @@
             <strong id="sidebarActiveUsersCount">0</strong>
           </div>
         </div>
-        <button type="button" class="sidebar-api-manage-btn" data-panel-target="usersPanel">Kullanicilari Goster</button>
+        <button type="button" class="sidebar-api-manage-btn" data-panel-target="usersPanel">Kullanıcıları Göster</button>
       </section>
 
-      <a href="index.html" class="sidebar-home-link">Siteye Don</a>
-      <button id="adminLogoutBtn" type="button" class="sidebar-logout-btn">Cikis Yap</button>
+      <a href="index.html" class="sidebar-home-link">Siteye Dön</a>
+      <button id="adminLogoutBtn" type="button" class="sidebar-logout-btn">Çıkış Yap</button>
     </aside>
 
     <main class="admin-main">
       <header class="admin-header">
         <div>
-          <p class="admin-kicker">Katalog yonetimi</p>
-          <h2>Sehir ve Otel Admin Paneli</h2>
-          <p class="admin-subtitle">Buradan yapilan islemler veritabanina yazilir ve ana sayfaya otomatik yansir.</p>
+          <p class="admin-kicker">Katalog yönetimi</p>
+          <h2>Şehir ve Otel Admin Paneli</h2>
+          <p class="admin-subtitle">Buradan yapılan işlemler veritabanına yazılır ve ana sayfaya otomatik yansır.</p>
         </div>
 
         <div class="admin-header-actions">
-          <button id="toggleSidebarBtn" type="button" class="btn-secondary sidebar-toggle-btn" aria-label="Menuyu ac/kapat">☰ Menu</button>
+          <button id="toggleSidebarBtn" type="button" class="btn-secondary sidebar-toggle-btn" aria-label="Menüyü aç/kapat">☰ Menü</button>
           <button id="darkModeToggleBtn" type="button" class="btn-secondary" title="Koyu mod">🌓</button>
-          <span id="apiStatusBadge" class="status-badge pending">API baglantisi kontrol ediliyor...</span>
+          <span id="apiStatusBadge" class="status-badge pending">API bağlantısı kontrol ediliyor...</span>
           <button id="refreshAdminDataBtn" type="button" class="btn-secondary">Veriyi Yenile</button>
         </div>
       </header>
@@ -88,7 +88,7 @@
       <section id="dashboardPanel" class="admin-panel active" aria-label="Dashboard">
         <div class="metric-grid">
           <article class="metric-card">
-            <h3>Toplam Sehir</h3>
+            <h3>Toplam Şehir</h3>
             <strong id="metricCities">0</strong>
           </article>
           <article class="metric-card">
@@ -107,17 +107,17 @@
 
         <article class="panel-card dashboard-note">
           <h3>Son Senkron Bilgisi</h3>
-          <p id="lastSyncText">Henuz senkron yapilmadi.</p>
+          <p id="lastSyncText">Henüz senkron yapılmadı.</p>
         </article>
 
         <div class="dashboard-bottom-row">
           <article class="panel-card table-card recent-records-card">
             <div class="card-head">
-              <h3>Son Eklenen 10 Kayit (Tum Sekmeler)</h3>
-              <span class="count-pill">Canli Ozet</span>
+              <h3>Son Eklenen 10 Kayıt (Tüm Sekmeler)</h3>
+              <span class="count-pill">Canlı Özet</span>
             </div>
             <div class="table-wrap">
-              <table class="admin-table" aria-label="Son eklenen kayitlar">
+              <table class="admin-table" aria-label="Son eklenen kayıtlar">
                 <thead>
                   <tr>
                     <th>Tip</th>
@@ -132,7 +132,7 @@
 
           <article class="panel-card table-card activity-log-card">
             <div class="card-head">
-              <h3>Son Islemler (Activity Log)</h3>
+              <h3>Son İşlemler (Activity Log)</h3>
               <span class="count-pill">Hareketler</span>
             </div>
             <div class="table-wrap">
@@ -140,8 +140,8 @@
                 <thead>
                   <tr>
                     <th>Zaman</th>
-                    <th>Islem</th>
-                    <th>Kullanici</th>
+                    <th>İşlem</th>
+                    <th>Kullanıcı</th>
                     <th>Detay</th>
                   </tr>
                 </thead>
@@ -152,17 +152,17 @@
 
           <article class="panel-card chart-card mini-chart-card">
             <div class="card-head">
-              <h3>Kullanici Giris / Cikis</h3>
-              <span class="count-pill">Canli</span>
+              <h3>Kullanıcı Giriş / Çıkış</h3>
+              <span class="count-pill">Canlı</span>
             </div>
-            <div id="userActivityChart" class="mini-chart" role="img" aria-label="Kullanici giris cikis grafigi"></div>
+            <div id="userActivityChart" class="mini-chart" role="img" aria-label="Kullanıcı giriş çıkış grafiği"></div>
             <div id="userActivityChartMeta" class="chart-meta"></div>
           </article>
 
           <article class="panel-card chart-card mini-chart-card">
             <div class="card-head">
-              <h3>Rezervasyon Akisi</h3>
-              <span class="count-pill">Canli</span>
+              <h3>Rezervasyon Akışı</h3>
+              <span class="count-pill">Canlı</span>
             </div>
             <div id="reservationActivityChart" class="mini-chart" role="img" aria-label="Rezervasyon grafigi"></div>
             <div id="reservationStatusLegend" class="chart-meta"></div>
@@ -170,48 +170,48 @@
         </div>
       </section>
 
-      <section id="citiesPanel" class="admin-panel" aria-label="Sehir yonetimi">
+      <section id="citiesPanel" class="admin-panel" aria-label="Şehir yönetimi">
         <div class="panel-layout">
           <article class="panel-card">
             <div class="card-head">
-              <h3 id="cityFormTitle">Yeni Sehir Ekle</h3>
+              <h3 id="cityFormTitle">Yeni Şehir Ekle</h3>
             </div>
 
             <form id="cityForm" class="admin-form" autocomplete="off">
               <input type="hidden" id="cityIdInput">
 
-              <label for="cityNameInput">Sehir Adi</label>
-              <input id="cityNameInput" type="text" required maxlength="80" placeholder="Ornek: Antalya">
+              <label for="cityNameInput">Şehir Adı</label>
+              <input id="cityNameInput" type="text" required maxlength="80" placeholder="Örnek: Antalya">
 
               <label for="citySlugInput">Slug (opsiyonel)</label>
-              <input id="citySlugInput" type="text" maxlength="80" placeholder="Ornek: antalya">
+              <input id="citySlugInput" type="text" maxlength="80" placeholder="Örnek: antalya">
 
-              <label for="cityDescriptionInput">Aciklama</label>
-              <textarea id="cityDescriptionInput" rows="3" placeholder="Sehir aciklamasi"></textarea>
+              <label for="cityDescriptionInput">Açıklama</label>
+              <textarea id="cityDescriptionInput" rows="3" placeholder="Şehir açıklaması"></textarea>
 
-              <label for="cityImageInput">Reg Gorseli (kart)</label>
-              <input id="cityImageInput" type="text" placeholder="Ornek: img/antreg.jpg">
+              <label for="cityImageInput">Reg Görseli (kart)</label>
+              <input id="cityImageInput" type="text" placeholder="Örnek: img/antreg.jpg">
               <div class="input-row-2">
                 <div>
-                  <label for="cityImageFileInput">Reg Gorseli Yukle</label>
+                  <label for="cityImageFileInput">Reg Görseli Yükle</label>
                   <input id="cityImageFileInput" type="file" accept="image/*">
                 </div>
                 <div class="inline-actions">
-                  <button id="uploadCityImageBtn" type="button" class="btn-secondary">Yukle</button>
-                  <small id="cityUploadStatusText">Dosya secip Yukle butonuna basin.</small>
+                  <button id="uploadCityImageBtn" type="button" class="btn-secondary">Yükle</button>
+                  <small id="cityUploadStatusText">Dosya seçip Yükle butonuna basın.</small>
                 </div>
               </div>
 
-              <label for="cityHeroImageInput">Hero Gorseli (sehir sayfasi banner)</label>
-              <input id="cityHeroImageInput" type="text" placeholder="Ornek: img/anthero.jpg">
+              <label for="cityHeroImageInput">Hero Görseli (şehir sayfası banner)</label>
+              <input id="cityHeroImageInput" type="text" placeholder="Örnek: img/anthero.jpg">
               <div class="input-row-2">
                 <div>
-                  <label for="cityHeroImageFileInput">Hero Gorseli Yukle</label>
+                  <label for="cityHeroImageFileInput">Hero Görseli Yükle</label>
                   <input id="cityHeroImageFileInput" type="file" accept="image/*">
                 </div>
                 <div class="inline-actions">
-                  <button id="uploadCityHeroImageBtn" type="button" class="btn-secondary">Yukle</button>
-                  <small id="cityHeroUploadStatusText">Dosya secip Yukle butonuna basin.</small>
+                  <button id="uploadCityHeroImageBtn" type="button" class="btn-secondary">Yükle</button>
+                  <small id="cityHeroUploadStatusText">Dosya seçip Yükle butonuna basın.</small>
                 </div>
               </div>
 
@@ -220,41 +220,41 @@
 
               <div class="city-palette-block">
                 <div class="city-palette-row">
-                  <label for="cityGradientStartColor">Baslangic Rengi</label>
+                  <label for="cityGradientStartColor">Başlangıç Rengi</label>
                   <input id="cityGradientStartColor" class="palette-color-input" type="color" value="#0b8969">
                 </div>
                 <div class="city-palette-row">
-                  <label for="cityGradientEndColor">Bitis Rengi</label>
+                  <label for="cityGradientEndColor">Bitiş Rengi</label>
                   <input id="cityGradientEndColor" class="palette-color-input" type="color" value="#046684">
                 </div>
 
                 <div class="city-palette-presets" id="cityPalettePresets"></div>
-                <div class="city-gradient-preview" id="cityGradientPreview" aria-label="Gradient onizleme"></div>
+                <div class="city-gradient-preview" id="cityGradientPreview" aria-label="Gradient önizleme"></div>
               </div>
 
               <label class="region-toggle-box" for="cityShowInRegionsInput">
                 <input id="cityShowInRegionsInput" type="checkbox">
-                <span>Ana sayfadaki region kartlarinda goster</span>
+                <span>Ana sayfadaki region kartlarında göster</span>
               </label>
 
               <div id="cityRegionSettings" class="region-settings-collapsible" aria-hidden="true">
                 <label for="cityRegionClassInput">Region Konumu</label>
                 <select id="cityRegionClassInput">
-                  <option value="large-left">Buyuk Sol</option>
-                  <option value="top-right">Ust Sag Genis</option>
+                  <option value="large-left">Büyük Sol</option>
+                  <option value="top-right">Üst Sağ Geniş</option>
                   <option value="middle-left">Orta Sol</option>
-                  <option value="middle-right">Orta Sag</option>
+                  <option value="middle-right">Orta Sağ</option>
                   <option value="bottom-left">Alt Sol</option>
-                  <option value="bottom-right" selected>Alt Sag</option>
+                  <option value="bottom-right" selected>Alt Sağ</option>
                 </select>
-                <p class="region-settings-hint">Tick acik degilse sehir anasayfada listelenmez.</p>
+                <p class="region-settings-hint">Tik açık değilse şehir anasayfada listelenmez.</p>
               </div>
 
               <label for="cityAliasesInput">Alias Listesi</label>
-              <input id="cityAliasesInput" type="text" placeholder="Virgul ile ayir: antalya, adalya">
+              <input id="cityAliasesInput" type="text" placeholder="Virgül ile ayır: antalya, adalya">
 
               <div class="form-actions">
-                <button id="saveCityBtn" type="submit" class="btn-primary">Sehri Kaydet</button>
+                <button id="saveCityBtn" type="submit" class="btn-primary">Şehri Kaydet</button>
                 <button id="resetCityFormBtn" type="button" class="btn-secondary">Temizle</button>
               </div>
             </form>
@@ -262,19 +262,19 @@
 
           <article class="panel-card table-card">
             <div class="card-head">
-              <h3>Sehir Listesi</h3>
-              <span id="cityCountText" class="count-pill">0 kayit</span>
+              <h3>Şehir Listesi</h3>
+              <span id="cityCountText" class="count-pill">0 kayıt</span>
             </div>
 
             <div class="table-wrap">
-              <table class="admin-table" aria-label="Sehir listesi tablosu">
+              <table class="admin-table" aria-label="Şehir listesi tablosu">
                 <thead>
                   <tr>
-                    <th>Sehir</th>
+                    <th>Şehir</th>
                     <th>Slug</th>
                     <th>Ana Sayfa</th>
                     <th>Otel</th>
-                    <th>Islem</th>
+                    <th>İşlem</th>
                   </tr>
                 </thead>
                 <tbody id="cityTableBody"></tbody>
@@ -284,7 +284,7 @@
         </div>
       </section>
 
-      <section id="hotelsPanel" class="admin-panel" aria-label="Otel yonetimi">
+      <section id="hotelsPanel" class="admin-panel" aria-label="Otel yönetimi">
         <div class="panel-layout">
           <article class="panel-card">
             <div class="card-head">
@@ -294,22 +294,22 @@
             <form id="hotelForm" class="admin-form" autocomplete="off">
               <input type="hidden" id="hotelIdInput">
 
-              <label for="hotelCitySelect">Sehir</label>
+              <label for="hotelCitySelect">Şehir</label>
               <select id="hotelCitySelect" required></select>
 
-              <label for="hotelNameInput">Otel Adi</label>
-              <input id="hotelNameInput" type="text" required maxlength="120" placeholder="Ornek: Marina Resort Antalya">
+              <label for="hotelNameInput">Otel Adı</label>
+              <input id="hotelNameInput" type="text" required maxlength="120" placeholder="Örnek: Marina Resort Antalya">
 
-              <label for="hotelImageInput">Gorsel Yolu</label>
-              <input id="hotelImageInput" type="text" placeholder="Ornek: img/antot6.jpg">
+              <label for="hotelImageInput">Görsel Yolu</label>
+              <input id="hotelImageInput" type="text" placeholder="Örnek: img/antot6.jpg">
               <div class="input-row-2">
                 <div>
-                  <label for="hotelImageFileInput">Otel Gorseli Yukle</label>
+                  <label for="hotelImageFileInput">Otel Görseli Yükle</label>
                   <input id="hotelImageFileInput" type="file" accept="image/*">
                 </div>
                 <div class="inline-actions">
-                  <button id="uploadHotelImageBtn" type="button" class="btn-secondary">Yukle</button>
-                  <small id="hotelUploadStatusText">Dosya secip Yukle butonuna basin.</small>
+                  <button id="uploadHotelImageBtn" type="button" class="btn-secondary">Yükle</button>
+                  <small id="hotelUploadStatusText">Dosya seçip Yükle butonuna basın.</small>
                 </div>
               </div>
 
@@ -324,8 +324,8 @@
                 </div>
               </div>
 
-              <label for="hotelFeaturesInput">Ozellikler</label>
-              <input id="hotelFeaturesInput" type="text" placeholder="Virgul ile ayir: Spa, Havuz, Denize Sifir">
+              <label for="hotelFeaturesInput">Özellikler</label>
+              <input id="hotelFeaturesInput" type="text" placeholder="Virgül ile ayır: Spa, Havuz, Denize Sıfır">
 
               <div class="form-actions">
                 <button id="saveHotelBtn" type="submit" class="btn-primary">Oteli Kaydet</button>
@@ -337,7 +337,7 @@
           <article class="panel-card table-card">
             <div class="card-head">
               <h3>Otel Listesi</h3>
-              <span id="hotelCountText" class="count-pill">0 kayit</span>
+              <span id="hotelCountText" class="count-pill">0 kayıt</span>
             </div>
 
             <div class="table-wrap">
@@ -345,10 +345,10 @@
                 <thead>
                   <tr>
                     <th>Otel</th>
-                    <th>Sehir</th>
+                    <th>Şehir</th>
                     <th>Puan</th>
                     <th>Fiyat</th>
-                    <th>Islem</th>
+                    <th>İşlem</th>
                   </tr>
                 </thead>
                 <tbody id="hotelTableBody"></tbody>
@@ -358,28 +358,28 @@
         </div>
       </section>
 
-      <section id="apisPanel" class="admin-panel" aria-label="API baglantilari yonetimi">
+      <section id="apisPanel" class="admin-panel" aria-label="API bağlantıları yönetimi">
         <div class="panel-layout">
           <article class="panel-card">
             <div class="card-head">
-              <h3 id="apiIntegrationFormTitle">Harici API Bagla</h3>
+              <h3 id="apiIntegrationFormTitle">Harici API Bağla</h3>
             </div>
 
             <form id="apiIntegrationForm" class="admin-form" autocomplete="off">
               <input type="hidden" id="apiIntegrationIdInput">
 
-              <label for="apiIntegrationNameInput">API Adi</label>
-              <input id="apiIntegrationNameInput" type="text" required maxlength="120" placeholder="Ornek: Odeme Servisi">
+              <label for="apiIntegrationNameInput">API Adı</label>
+              <input id="apiIntegrationNameInput" type="text" required maxlength="120" placeholder="Örnek: Ödeme Servisi">
 
               <label for="apiIntegrationBaseUrlInput">Base URL</label>
-              <input id="apiIntegrationBaseUrlInput" type="url" required placeholder="Ornek: http://localhost:7001">
+              <input id="apiIntegrationBaseUrlInput" type="url" required placeholder="Örnek: http://localhost:7001">
 
-              <label for="apiIntegrationHealthPathInput">Saglik Path</label>
-              <input id="apiIntegrationHealthPathInput" type="text" value="/api/health" placeholder="Ornek: /api/health">
+              <label for="apiIntegrationHealthPathInput">Sağlık Path</label>
+              <input id="apiIntegrationHealthPathInput" type="text" value="/api/health" placeholder="Örnek: /api/health">
 
               <label class="inline-check-label" for="apiIntegrationEnabledInput">
                 <input id="apiIntegrationEnabledInput" type="checkbox" checked>
-                <span>Baglanti aktif</span>
+                <span>Bağlantı aktif</span>
               </label>
 
               <div class="form-actions">
@@ -391,22 +391,22 @@
 
           <article class="panel-card table-card api-module-card">
             <div class="card-head">
-              <h3>Daginik API Modul Kontrolu</h3>
+              <h3>Dağıtık API Modül Kontrolü</h3>
               <div class="inline-actions-row">
-                <span id="apiModuleCountText" class="count-pill">0 modul</span>
-                <button id="refreshApiModulesBtn" type="button" class="btn-secondary">Modulleri Yenile</button>
+                <span id="apiModuleCountText" class="count-pill">0 modül</span>
+                <button id="refreshApiModulesBtn" type="button" class="btn-secondary">Modülleri Yenile</button>
               </div>
             </div>
 
             <div class="table-wrap">
-              <table class="admin-table" aria-label="API modul listesi tablosu">
+              <table class="admin-table" aria-label="API modül listesi tablosu">
                 <thead>
                   <tr>
-                    <th>Modul</th>
-                    <th>Aciklama</th>
+                    <th>Modül</th>
+                    <th>Açıklama</th>
                     <th>Durum</th>
-                    <th>Son Guncelleme</th>
-                    <th>Islem</th>
+                    <th>Son Güncelleme</th>
+                    <th>İşlem</th>
                   </tr>
                 </thead>
                 <tbody id="apiModuleTableBody"></tbody>
@@ -416,10 +416,10 @@
 
           <article class="panel-card table-card integration-list-card">
             <div class="card-head">
-              <h3>Bagli API Listesi</h3>
+              <h3>Bağlı API Listesi</h3>
               <div class="inline-actions-row">
-                <span id="apiIntegrationCountText" class="count-pill">0 kayit</span>
-                <button id="checkAllApisBtn" type="button" class="btn-secondary">Tumunu Kontrol Et</button>
+                <span id="apiIntegrationCountText" class="count-pill">0 kayıt</span>
+                <button id="checkAllApisBtn" type="button" class="btn-secondary">Tümünü Kontrol Et</button>
               </div>
             </div>
 
@@ -431,7 +431,7 @@
                     <th>Base URL</th>
                     <th>Durum</th>
                     <th>Son Kontrol</th>
-                    <th>Islem</th>
+                    <th>İşlem</th>
                   </tr>
                 </thead>
                 <tbody id="apiIntegrationTableBody"></tbody>
@@ -441,37 +441,37 @@
         </div>
       </section>
 
-      <section id="usersPanel" class="admin-panel" aria-label="Kullanici yonetimi">
+      <section id="usersPanel" class="admin-panel" aria-label="Kullanıcı yönetimi">
         <div class="panel-layout users-panel-layout">
           <article class="panel-card">
             <div class="card-head">
-              <h3 id="userAccessFormTitle">Kullanici Rutbe ve Erişim</h3>
+              <h3 id="userAccessFormTitle">Kullanıcı Rütbe ve Erişim</h3>
             </div>
 
             <form id="userAccessForm" class="admin-form" autocomplete="off">
               <input type="hidden" id="userAccessUserIdInput">
 
-              <label for="userAccessUserNameInput">Kullanici</label>
-              <input id="userAccessUserNameInput" type="text" readonly placeholder="Tablodan kullanici secin">
+              <label for="userAccessUserNameInput">Kullanıcı</label>
+              <input id="userAccessUserNameInput" type="text" readonly placeholder="Tablodan kullanıcı seçin">
 
-              <label for="userRoleSelect">Rutbe</label>
+              <label for="userRoleSelect">Rütbe</label>
               <select id="userRoleSelect">
-                <option value="kullanici">Kullanici</option>
+                <option value="kullanici">Kullanıcı</option>
                 <option value="alt_yetkili">Alt Yetkili</option>
-                <option value="ust_yetkili">Ust Yetkili</option>
+                <option value="ust_yetkili">Üst Yetkili</option>
                 <option value="patron">Patron</option>
               </select>
 
-              <label>Sidebar Erisimleri</label>
+              <label>Sidebar Erişimleri</label>
               <div class="permission-grid" id="userSidebarPermissions">
                 <label class="permission-item"><input type="checkbox" value="dashboardPanel"> <span>Dashboard</span></label>
-                <label class="permission-item"><input type="checkbox" value="citiesPanel"> <span>Sehir</span></label>
+                <label class="permission-item"><input type="checkbox" value="citiesPanel"> <span>Şehir</span></label>
                 <label class="permission-item"><input type="checkbox" value="hotelsPanel"> <span>Otel</span></label>
-                <label class="permission-item"><input type="checkbox" value="apisPanel"> <span>API Baglantilari</span></label>
-                <label class="permission-item"><input type="checkbox" value="usersPanel"> <span>Kullanicilar</span></label>
+                <label class="permission-item"><input type="checkbox" value="apisPanel"> <span>API Bağlantıları</span></label>
+                <label class="permission-item"><input type="checkbox" value="usersPanel"> <span>Kullanıcılar</span></label>
               </div>
 
-              <p id="userAccessFormNote" class="region-settings-hint">Rutbe atamasi ve sidebar erişimlerini sadece patron yetkisi kaydedebilir.</p>
+              <p id="userAccessFormNote" class="region-settings-hint">Rütbe ataması ve sidebar erişimlerini sadece patron yetkisi kaydedebilir.</p>
 
               <div class="form-actions">
                 <button id="saveUserAccessBtn" type="submit" class="btn-primary">Yetkiyi Kaydet</button>
@@ -482,17 +482,17 @@
 
           <article class="panel-card">
             <div class="card-head">
-              <h3>Kullanici Ozeti</h3>
-              <button id="refreshUsersBtn" type="button" class="btn-secondary">Kullanicilari Yenile</button>
+              <h3>Kullanıcı Özeti</h3>
+              <button id="refreshUsersBtn" type="button" class="btn-secondary">Kullanıcıları Yenile</button>
             </div>
 
             <div class="metric-grid users-metric-grid">
               <article class="metric-card">
-                <h3>Kayitli Kullanici</h3>
+                <h3>Kayıtlı Kullanıcı</h3>
                 <strong id="registeredUsersCount">0</strong>
               </article>
               <article class="metric-card">
-                <h3>Aktif Kullanici</h3>
+                <h3>Aktif Kullanıcı</h3>
                 <strong id="activeUsersCount">0</strong>
               </article>
             </div>
@@ -500,21 +500,21 @@
 
           <article class="panel-card table-card">
             <div class="card-head">
-              <h3>Kayitli Kullanicilar</h3>
-              <span id="registeredUsersTableCount" class="count-pill">0 kayit</span>
+              <h3>Kayıtlı Kullanıcılar</h3>
+              <span id="registeredUsersTableCount" class="count-pill">0 kayıt</span>
             </div>
 
             <div class="table-wrap">
-              <table class="admin-table" aria-label="Kayitli kullanicilar tablosu">
+              <table class="admin-table" aria-label="Kayıtlı kullanıcılar tablosu">
                 <thead>
                   <tr>
                     <th>Ad Soyad</th>
                     <th>E-posta</th>
-                    <th>Rutbe</th>
+                    <th>Rütbe</th>
                     <th>Durum</th>
-                    <th>Kayit Tarihi</th>
+                    <th>Kayıt Tarihi</th>
                     <th>Son Aktivite</th>
-                    <th>Islem</th>
+                    <th>İşlem</th>
                   </tr>
                 </thead>
                 <tbody id="registeredUsersTableBody"></tbody>
@@ -524,12 +524,12 @@
 
           <article class="panel-card table-card">
             <div class="card-head">
-              <h3>Aktif Kullanicilar</h3>
-              <span id="activeUsersTableCount" class="count-pill">0 kayit</span>
+              <h3>Aktif Kullanıcılar</h3>
+              <span id="activeUsersTableCount" class="count-pill">0 kayıt</span>
             </div>
 
             <div class="table-wrap">
-              <table class="admin-table" aria-label="Aktif kullanicilar tablosu">
+              <table class="admin-table" aria-label="Aktif kullanıcılar tablosu">
                 <thead>
                   <tr>
                     <th>Ad Soyad</th>

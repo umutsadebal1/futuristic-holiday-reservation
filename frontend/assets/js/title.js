@@ -2,55 +2,55 @@ window.CITY_TITLES = {
   antalya: {
     pageTitle: "Antalya Otelleri - TatilRez",
     heroTitle: "Antalya",
-    heroDescription: "Akdeniz'in Incisi - Plajlar, Antikalar ve Gunes",
-    hotelsSectionTitle: "Antalya'da Populer Oteller"
+    heroDescription: "Akdeniz'in İncisi - Plajlar, Antikalar ve Güneş",
+    hotelsSectionTitle: "Antalya'da Popüler Oteller"
   },
   bodrum: {
     pageTitle: "Bodrum Otelleri - TatilRez",
     heroTitle: "Bodrum",
-    heroDescription: "Akdeniz'in Mucevheri - Plajlar ve Antik Limanlar",
-    hotelsSectionTitle: "Bodrum'da Populer Oteller"
+    heroDescription: "Akdeniz'in Mücevheri - Plajlar ve Antik Limanlar",
+    hotelsSectionTitle: "Bodrum'da Popüler Oteller"
   },
   bursa: {
     pageTitle: "Bursa Otelleri - TatilRez",
     heroTitle: "Bursa",
-    heroDescription: "Daglar ve Kis Sporlari - Uludag Yakini",
-    hotelsSectionTitle: "Bursa'da Populer Oteller"
+    heroDescription: "Dağlar ve Kış Sporları - Uludağ Yakını",
+    hotelsSectionTitle: "Bursa'da Popüler Oteller"
   },
   diyarbakir: {
-    pageTitle: "Diyarbakir Otelleri - TatilRez",
-    heroTitle: "Diyarbakir",
-    heroDescription: "Dicle'nin Kiyisinda - Tarihler Saklayan Kale Sehri",
-    hotelsSectionTitle: "Diyarbakir'da Populer Oteller"
+    pageTitle: "Diyarbakır Otelleri - TatilRez",
+    heroTitle: "Diyarbakır",
+    heroDescription: "Dicle'nin Kıyısında - Tarihleri Saklayan Kale Şehri",
+    hotelsSectionTitle: "Diyarbakır'da Popüler Oteller"
   },
   izmir: {
-    pageTitle: "Izmir Otelleri - TatilRez",
-    heroTitle: "Izmir",
-    heroDescription: "Ege'nin Baskenti - Deniz, Tarih ve Yasam",
-    hotelsSectionTitle: "Izmir'de Populer Oteller"
+    pageTitle: "İzmir Otelleri - TatilRez",
+    heroTitle: "İzmir",
+    heroDescription: "Ege'nin Başkenti - Deniz, Tarih ve Yaşam",
+    hotelsSectionTitle: "İzmir'de Popüler Oteller"
   },
   mardin: {
     pageTitle: "Mardin Otelleri - TatilRez",
     heroTitle: "Mardin",
-    heroDescription: "Tarihler Icinde Kayip Bir Sehir - Mezopotamya'nin Mucevheri",
-    hotelsSectionTitle: "Mardin'de Populer Oteller"
+    heroDescription: "Tarihlerin İçinde Kayıp Bir Şehir - Mezopotamya'nın Mücevheri",
+    hotelsSectionTitle: "Mardin'de Popüler Oteller"
   },
   mugla: {
-    pageTitle: "Mugla Otelleri - TatilRez",
-    heroTitle: "Mugla",
-    heroDescription: "Ege ve Akdeniz'in Bulustugu Cennet",
-    hotelsSectionTitle: "Mugla'da Populer Oteller"
+    pageTitle: "Muğla Otelleri - TatilRez",
+    heroTitle: "Muğla",
+    heroDescription: "Ege ve Akdeniz'in Buluştuğu Cennet",
+    hotelsSectionTitle: "Muğla'da Popüler Oteller"
   },
   trabzon: {
     pageTitle: "Trabzon Otelleri - TatilRez",
     heroTitle: "Trabzon",
-    heroDescription: "Karadeniz'in Incisi - Doga, Kultur ve Yaylalarin Guzelligi",
-    hotelsSectionTitle: "Trabzon'da Populer Oteller"
+    heroDescription: "Karadeniz'in İncisi - Doğa, Kültür ve Yaylaların Güzelliği",
+    hotelsSectionTitle: "Trabzon'da Popüler Oteller"
   },
   van: {
     pageTitle: "Van Otelleri - TatilRez",
     heroTitle: "Van",
-    heroDescription: "Van Golu ve Tarihi Guzellikler",
-    hotelsSectionTitle: "Van'da Populer Oteller"
+    heroDescription: "Van Gölü ve Tarihi Güzellikler",
+    hotelsSectionTitle: "Van'da Popüler Oteller"
   }
 };

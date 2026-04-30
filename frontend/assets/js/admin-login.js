@@ -43,7 +43,7 @@ async function requestPost(pathname, payload, headers) {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(data.message || 'Islem basarisiz.');
+    const error = new Error(data.message || 'İşlem başarısız.');
     error.status = response.status;
     throw error;
   }
@@ -61,7 +61,7 @@ async function requestGet(pathname, headers) {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(data.message || 'Dogrulama alinamadi.');
+    const error = new Error(data.message || 'Doğrulama alınamadı.');
     error.status = response.status;
     throw error;
   }
@@ -83,7 +83,7 @@ function setLoading(loading) {
   const submitBtn = document.getElementById('adminLoginSubmitBtn');
   if (!submitBtn) return;
   submitBtn.disabled = loading;
-  submitBtn.textContent = loading ? 'Dogrulaniyor...' : 'Dogrula ve Panele Gir';
+  submitBtn.textContent = loading ? 'Doğrulanıyor...' : 'Doğrula ve Panele Gir';
 }
 
 function saveSession(user, tokens) {
@@ -184,7 +184,7 @@ function waitForRecaptchaApi(timeoutMs) {
       }
 
       if (Date.now() - startedAt >= timeoutMs) {
-        reject(new Error('Google reCAPTCHA hazir degil.'));
+        reject(new Error('Google reCAPTCHA hazır değil.'));
         return;
       }
 
@@ -224,7 +224,7 @@ async function loadGoogleRecaptchaScript(siteKey) {
         script.dataset.recaptchaSrc = source;
         await new Promise((resolve, reject) => {
           script.onload = () => resolve();
-          script.onerror = () => reject(new Error('Script yuklenemedi: ' + source));
+          script.onerror = () => reject(new Error('Script yüklenemedi: ' + source));
           document.head.appendChild(script);
         });
       }
@@ -236,7 +236,7 @@ async function loadGoogleRecaptchaScript(siteKey) {
     }
   }
 
-  throw lastError || new Error('Google reCAPTCHA script yuklenemedi.');
+  throw lastError || new Error('Google reCAPTCHA script yüklenemedi.');
 }
 
 function executeRecaptcha(siteKey, action) {
@@ -297,11 +297,11 @@ async function getHumanCheckToken(email, humanCheckConfig) {
     } catch (error) {
       const detail = String(error?.message || '').toLowerCase();
       if (detail.includes('invalid key type')) {
-        setHumanCheckModeLabel('Google key tipi uyumsuz. Gecici olarak lokal human check moduna gecildi.', true);
+        setHumanCheckModeLabel('Google key tipi uyumsuz. Geçici olarak lokal human check moduna geçildi.', true);
       } else if (detail.includes('content security policy') || detail.includes('csp') || detail.includes('browser-error')) {
-        setHumanCheckModeLabel('Tarayici CSP nedeniyle Google engellendi. Gecici olarak lokal human check modu kullaniliyor.', true);
+        setHumanCheckModeLabel('Tarayıcı CSP nedeniyle Google engellendi. Geçici olarak lokal human check modu kullanılıyor.', true);
       } else {
-        setHumanCheckModeLabel('Google reCAPTCHA kullanilamadi. Gecici olarak lokal human check moduna gecildi.', true);
+        setHumanCheckModeLabel('Google reCAPTCHA kullanılamadı. Geçici olarak lokal human check moduna geçildi.', true);
       }
 
       return {
@@ -321,12 +321,12 @@ async function verifyAdminAccess(email, password) {
   const loginPayload = await requestPost('/api/auth/login', { email, password });
   const loginUser = loginPayload?.user;
   if (!loginUser) {
-    throw new Error('Giris yaniti alinamadi.');
+    throw new Error('Giriş yanıtı alınamadı.');
   }
 
   const accessToken = String(loginPayload?.tokens?.accessToken || '').trim();
   if (!accessToken) {
-    throw new Error('Token olusturulamadi.');
+    throw new Error('Token oluşturulamadı.');
   }
 
   const profilePayload = await requestGet('/api/auth/me', {
@@ -345,7 +345,7 @@ async function verifyAdminAccess(email, password) {
 
     localStorage.removeItem('authSession');
     localStorage.removeItem(AUTH_TOKENS_STORAGE_KEY);
-    throw new Error('Bu hesap admin paneli icin yetkili degil.');
+    throw new Error('Bu hesap admin paneli için yetkili değil.');
   }
 
   saveSession(profileUser, loginPayload?.tokens || null);
@@ -397,31 +397,31 @@ async function verifyHumanCheckWithFallback(email, humanCheckPayload) {
 
   const isGoogleProvider = humanCheckPayload.provider === 'google' || humanCheckPayload.provider === 'google-enterprise';
   if (!isGoogleProvider || !shouldRetryWithLocal(firstTry)) {
-    const message = String(firstTry?.message || 'Human check dogrulamasi basarisiz oldu.');
+    const message = String(firstTry?.message || 'Human check doğrulaması başarısız oldu.');
     throw new Error(message);
   }
-  setHumanCheckModeLabel('Google human check tarayici nedeniyle engellendi, lokal moda gecildi.', true);
+  setHumanCheckModeLabel('Google human check tarayıcı nedeniyle engellendi, lokal moda geçildi.', true);
 
   let challenge;
   try {
     challenge = await requestGet('/api/humancheck/math-challenge');
   } catch (error) {
-    throw new Error('Human check dogrulamasi alinamadi: ' + (error.message || 'bilinmeyen hata'));
+    throw new Error('Human check doğrulaması alınamadı: ' + (error.message || 'bilinmeyen hata'));
   }
 
   if (!challenge || !challenge.challenge) {
-    throw new Error('Human check sorusu olusturulamadi.');
+    throw new Error('Human check sorusu oluşturulamadı.');
   }
 
   const c = challenge.challenge;
-  const answerRaw = window.prompt('Lutfen asagidaki islemi yapin: ' + c.a + ' + ' + c.b + ' = ?');
+  const answerRaw = window.prompt('Lütfen aşağıdaki işlemi yapın: ' + c.a + ' + ' + c.b + ' = ?');
   if (answerRaw === null) {
     throw new Error('Human check iptal edildi.');
   }
 
   const answer = Number(String(answerRaw).trim());
   if (!Number.isFinite(answer)) {
-    throw new Error('Human check icin gecerli bir sayi girmelisiniz.');
+    throw new Error('Human check için geçerli bir sayı girmelisiniz.');
   }
 
   const verifyResp = await fetch(buildApiUrl('/api/humancheck/verify-math'), {
@@ -432,7 +432,7 @@ async function verifyHumanCheckWithFallback(email, humanCheckPayload) {
   const verifyData = await verifyResp.json().catch(() => ({}));
 
   if (!verifyResp.ok || !verifyData?.verified) {
-    throw new Error(String(verifyData?.message || 'Human check yanlis. Lutfen dogru cevabi girin.'));
+    throw new Error(String(verifyData?.message || 'Human check yanlış. Lütfen doğru cevabı girin.'));
   }
 
   return verifyData;
@@ -471,13 +471,13 @@ function initAdminLoginPage() {
   }
 
   if (getDeniedMessage()) {
-    setFeedback('Admin paneline erisim icin yetkili hesapla giris yapmaniz gerekiyor.', 'error');
+    setFeedback('Admin paneline erişim için yetkili hesapla giriş yapmanız gerekiyor.', 'error');
   }
 
   getHumanCheckConfig().then((config) => {
     humanCheckConfig = config;
     if (config.forcedLocal) {
-      setHumanCheckModeLabel('Sayfa file:// uzerinden acik. Google reCAPTCHA icin localhost/http(s) gerekir, lokal human check modu kullaniliyor.', false);
+      setHumanCheckModeLabel('Sayfa file:// üzerinden açık. Google reCAPTCHA için localhost/http(s) gerekir, lokal human check modu kullanılıyor.', false);
       return;
     }
 
@@ -488,9 +488,9 @@ function initAdminLoginPage() {
       setHumanCheckModeLabel(providerLabel, false);
       return;
     }
-    setHumanCheckModeLabel('Google key tanimli degil, lokal human check modu kullaniliyor.', false);
+    setHumanCheckModeLabel('Google key tanımlı değil, lokal human check modu kullanılıyor.', false);
   }).catch(() => {
-    setHumanCheckModeLabel('Human check konfigurasyonu okunamadi.', true);
+    setHumanCheckModeLabel('Human check konfigürasyonu okunamadı.', true);
   });
 
   form.addEventListener('submit', async (event) => {
@@ -500,7 +500,7 @@ function initAdminLoginPage() {
     const password = String(document.getElementById('adminPasswordInput')?.value || '');
 
     if (!email || !password) {
-      setFeedback('Lutfen e-posta ve sifre alanlarini doldurun.', 'error');
+      setFeedback('Lütfen e-posta ve şifre alanlarını doldurun.', 'error');
       return;
     }
 
@@ -514,20 +514,20 @@ function initAdminLoginPage() {
       const humanCheckPayload = await getHumanCheckToken(email, humanCheckConfig);
       const humanCheck = await verifyHumanCheckWithFallback(email, humanCheckPayload);
       if (!humanCheck?.verified) {
-        throw new Error('Human check dogrulamasi basarisiz oldu.');
+        throw new Error('Human check doğrulaması başarısız oldu.');
       }
 
       const user = await verifyAdminAccess(email, password);
-      setFeedback('Hos geldiniz ' + (user.name || user.email) + '. Admin paneline yonlendiriliyorsunuz...');
-      if (showcaseCopyTitle) showcaseCopyTitle.textContent = 'Hos Geldiniz';
-      if (showcaseCopyBody) showcaseCopyBody.textContent = 'Hos geldiniz, ' + (user.name || user.email);
+      setFeedback('Hoş geldiniz ' + (user.name || user.email) + '. Admin paneline yönlendiriliyorsunuz...');
+      if (showcaseCopyTitle) showcaseCopyTitle.textContent = 'Hoş Geldiniz';
+      if (showcaseCopyBody) showcaseCopyBody.textContent = 'Hoş geldiniz, ' + (user.name || user.email);
       window.setTimeout(() => {
         window.location.href = '/admin-panel';
       }, 1200);
     } catch (error) {
-      setFeedback(error.message || 'Admin dogrulamasi basarisiz oldu.', 'error');
+      setFeedback(error.message || 'Admin doğrulaması başarısız oldu.', 'error');
       if (showcaseCopyTitle) showcaseCopyTitle.textContent = 'Portal Security';
-      if (showcaseCopyBody) showcaseCopyBody.textContent = 'Dogrulama basarisiz. Bilgileri kontrol edip tekrar deneyin.';
+      if (showcaseCopyBody) showcaseCopyBody.textContent = 'Doğrulama başarısız. Bilgileri kontrol edip tekrar deneyin.';
     } finally {
       setLoading(false);
       if (shell) {

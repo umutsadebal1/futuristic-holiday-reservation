@@ -81,7 +81,7 @@
 
             <div class="search-container product-search-shell">
                 <div class="search-box ets-like-search-box">
-                    <div class="search-tabs" id="searchTabs" role="tablist" aria-label="Urun secimi">
+                    <div class="search-tabs" id="searchTabs" role="tablist" aria-label="Ürün seçimi">
                         <button type="button" class="search-tab active" data-product="hotel">Otel</button>
                         <button type="button" class="search-tab" data-product="tour">Tur</button>
                         <button type="button" class="search-tab" data-product="flight">Uçak</button>
@@ -100,10 +100,10 @@
                                     <option value="Antalya"></option>
                                     <option value="Bodrum"></option>
                                     <option value="Bursa"></option>
-                                    <option value="Diyarbakir"></option>
-                                    <option value="Izmir"></option>
+                                    <option value="Diyarbakır"></option>
+                                    <option value="İzmir"></option>
                                     <option value="Mardin"></option>
-                                    <option value="Mugla"></option>
+                                    <option value="Muğla"></option>
                                     <option value="Trabzon"></option>
                                     <option value="Van"></option>
                                 </datalist>
@@ -148,10 +148,10 @@
                             <div class="search-field">
                                 <label>Kişi</label>
                                 <select id="tourGuests">
-                                    <option value="1">1 Kisi</option>
-                                    <option value="2" selected>2 Kisi</option>
-                                    <option value="3">3 Kisi</option>
-                                    <option value="4">4+ Kisi</option>
+                                    <option value="1">1 Kişi</option>
+                                    <option value="2" selected>2 Kişi</option>
+                                    <option value="3">3 Kişi</option>
+                                    <option value="4">4+ Kişi</option>
                                 </select>
                             </div>
                         </div>
@@ -159,7 +159,7 @@
                         <div class="search-panel" data-panel="flight">
                             <div class="search-field wide">
                                 <label>Nereden / Nereye</label>
-                                <input type="text" id="flightRoute" placeholder="Istanbul - Antalya">
+                                <input type="text" id="flightRoute" placeholder="İstanbul - Antalya">
                             </div>
                             <div class="search-field">
                                 <label>Gidiş</label>
@@ -168,9 +168,9 @@
                             <div class="search-field">
                                 <label>Yolcu</label>
                                 <select id="flightGuests">
-                                    <option value="1" selected>1 Yetiskin</option>
-                                    <option value="2">2 Yetiskin</option>
-                                    <option value="3">3 Yetiskin</option>
+                                    <option value="1" selected>1 Yetişkin</option>
+                                    <option value="2">2 Yetişkin</option>
+                                    <option value="3">3 Yetişkin</option>
                                 </select>
                             </div>
                         </div>
@@ -191,10 +191,10 @@
                             <div class="search-field">
                                 <label>Kişi</label>
                                 <select id="villaGuests">
-                                    <option value="2">2 Kisi</option>
-                                    <option value="4" selected>4 Kisi</option>
-                                    <option value="6">6 Kisi</option>
-                                    <option value="8">8+ Kisi</option>
+                                    <option value="2">2 Kişi</option>
+                                    <option value="4" selected>4 Kişi</option>
+                                    <option value="6">6 Kişi</option>
+                                    <option value="8">8+ Kişi</option>
                                 </select>
                             </div>
                         </div>
@@ -276,10 +276,10 @@
         <div class="regions-filter" id="regionsFilterButtons">
             <button class="filter-tag active" type="button" data-city="antalya">Antalya</button>
             <button class="filter-tag" type="button" data-city="mardin">Mardin</button>
-            <button class="filter-tag" type="button" data-city="diyarbakir">Diyarbakir</button>
+            <button class="filter-tag" type="button" data-city="diyarbakir">Diyarbakır</button>
             <button class="filter-tag" type="button" data-city="trabzon">Trabzon</button>
-            <button class="filter-tag" type="button" data-city="mugla">Mugla</button>
-            <button class="filter-tag" type="button" data-city="izmir">Izmir</button>
+            <button class="filter-tag" type="button" data-city="mugla">Muğla</button>
+            <button class="filter-tag" type="button" data-city="izmir">İzmir</button>
         </div>
         <div class="regions-cascade-grid" id="regionsCascade"></div>
     </section>
@@ -305,7 +305,7 @@
             <button id="openNotificationPrefsBtn" class="section-link-button" type="button">Bildirim Tercihleri</button>
         </div>
         <div class="campaign-slider" id="campaignSlider">
-            <button id="campaignPrevBtn" class="carousel-nav carousel-prev campaign-nav" type="button" aria-label="Onceki kampanya">❮</button>
+            <button id="campaignPrevBtn" class="carousel-nav carousel-prev campaign-nav" type="button" aria-label="Önceki kampanya">❮</button>
             <div class="campaign-track-wrap">
                 <div class="campaign-grid campaign-track" id="campaignGrid"></div>
             </div>
@@ -419,7 +419,7 @@
     <div id="bookingModal" class="modal">
         <div class="modal-content booking-wizard-modal">
             <span class="close" id="closeBookingModal">&times;</span>
-            <h2>Rezervasyonunuzu Tamamlayin</h2>
+            <h2>Rezervasyonunuzu Tamamlayın</h2>
 
             <ol class="booking-stepper" id="bookingStepper">
                 <li class="active">Bilgiler</li>
@@ -431,7 +431,7 @@
             <form id="bookingForm">
                 <div class="booking-step-panel active" data-step-panel="0">
                     <div class="form-group">
-                        <label>Tatil Yeri / Otel Adi</label>
+                        <label>Tatil Yeri / Otel Adı</label>
                         <input type="text" id="resortName" readonly>
                     </div>
                     <div class="form-group">
@@ -439,18 +439,18 @@
                         <input type="date" id="bookingCheckIn" required>
                     </div>
                     <div class="form-group">
-                        <label>Cikis Tarihi</label>
+                        <label>Çıkış Tarihi</label>
                         <input type="date" id="bookingCheckOut" required>
                     </div>
                     <div class="form-group">
-                        <label>Konuk Sayisi</label>
+                        <label>Konuk Sayısı</label>
                         <input type="number" id="bookingGuests" min="1" required>
                     </div>
                 </div>
 
                 <div class="booking-step-panel" data-step-panel="1">
                     <div class="form-group">
-                        <label>Tam Adiniz</label>
+                        <label>Tam Adınız</label>
                         <input type="text" id="guestName" required>
                     </div>
                     <div class="form-group">
@@ -471,7 +471,7 @@
                     <div class="form-group">
                         <label>Oda Tipi</label>
                         <select id="roomType" required>
-                            <option value="">Oda Tipi Secin</option>
+                            <option value="">Oda Tipi Seçin</option>
                             <option value="Standard">Standart Oda</option>
                             <option value="Deluxe">Deluxe Oda</option>
                             <option value="Suite">Suite</option>
@@ -490,14 +490,14 @@
                         <label class="payment-option-card">
                             <input type="radio" name="paymentPlan" value="half">
                             <div>
-                                <strong>Simdi %50, Kalani Sonra</strong>
+                                <strong>Şimdi %50, Kalanı Sonra</strong>
                                 <p>Check-in öncesi kalan ödeme tamamlama</p>
                             </div>
                         </label>
                     </div>
 
                     <div class="installment-table-wrap">
-                        <h4>Taksit Avantajlari</h4>
+                        <h4>Taksit Avantajları</h4>
                         <table class="installment-table">
                             <thead>
                                 <tr>
@@ -531,12 +531,12 @@
                     <div class="price-summary">
                         <p>Toplam Fiyat: <strong id="totalPrice">₺0</strong></p>
                     </div>
-                    <p class="final-confirm-copy">Rezervasyon bilgileriniz dogrulandiktan sonra onay e-postasi gonderilecektir.</p>
+                    <p class="final-confirm-copy">Rezervasyon bilgileriniz doğrulandıktan sonra onay e-postası gönderilecektir.</p>
                 </div>
 
                 <div class="booking-step-actions">
                     <button id="bookingPrevStepBtn" type="button" class="btn-secondary" disabled>Geri</button>
-                    <button id="bookingNextStepBtn" type="button" class="btn-secondary">Ileri</button>
+                    <button id="bookingNextStepBtn" type="button" class="btn-secondary">İleri</button>
                     <button id="bookingSubmitBtn" type="submit" class="btn-book hidden">Rezervasyonu Onayla</button>
                 </div>
             </form>
@@ -546,9 +546,9 @@
     <div id="hotelDetailModal" class="modal">
         <div class="modal-content hotel-detail-modal-content">
             <span class="close" id="closeHotelDetailModal">&times;</span>
-            <h2 id="hotelDetailTitle">Otel Detayi</h2>
+            <h2 id="hotelDetailTitle">Otel Detayı</h2>
             <div class="hotel-detail-gallery">
-                <img id="hotelDetailMainImage" src="img/logo.png" alt="Otel gorseli">
+                <img id="hotelDetailMainImage" src="img/logo.png" alt="Otel görseli">
                 <div id="hotelDetailThumbs" class="hotel-detail-thumbs"></div>
             </div>
             <div class="hotel-detail-grid">
@@ -571,7 +571,7 @@
     <div id="campaignDetailModal" class="modal">
         <div class="modal-content campaign-detail-modal-content">
             <span class="close" id="closeCampaignDetailModal">&times;</span>
-            <h2 id="campaignDetailTitle">Kampanya Detayi</h2>
+            <h2 id="campaignDetailTitle">Kampanya Detayı</h2>
             <p id="campaignDetailDescription"></p>
             <div class="campaign-coupon-box">
                 <span>Kod:</span>
@@ -632,7 +632,7 @@
     <div id="callMeModal" class="modal">
         <div class="modal-content call-me-modal-content">
             <span class="close" id="closeCallMeModal">&times;</span>
-            <h2>Sizi Arayalim</h2>
+            <h2>Sizi Arayalım</h2>
             <form id="callMeForm" class="call-me-form">
                 <div class="form-group">
                     <label>Ad Soyad</label>
@@ -650,7 +650,7 @@
                         <option value="15:00-18:00">15:00 - 18:00</option>
                     </select>
                 </div>
-                <button type="submit" class="btn-book">Geri Arama Talebi Olustur</button>
+                <button type="submit" class="btn-book">Geri Arama Talebi Oluştur</button>
             </form>
         </div>
     </div>
