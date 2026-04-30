@@ -9,7 +9,7 @@
  * Mevcut kullanici varsa parolayi gunceller ve role/yetkileri ataryazar.
  */
 
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 const bcrypt = require('bcrypt');
 const pool = require('../db');
 
