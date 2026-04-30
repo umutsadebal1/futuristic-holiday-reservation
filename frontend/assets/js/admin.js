@@ -10,7 +10,7 @@
     ALT_YETKILI: 'alt_yetkili',
     KULLANICI: 'kullanici'
   };
-  const SIDEBAR_PERMISSION_KEYS = ['dashboardPanel', 'citiesPanel', 'hotelsPanel', 'apisPanel', 'usersPanel'];
+  const SIDEBAR_PERMISSION_KEYS = ['dashboardPanel', 'citiesPanel', 'hotelsPanel', 'apisPanel', 'usersPanel', 'reservationsPanel', 'contactPanel'];
   const CITY_PALETTE_PRESETS = [
     { label: 'Akdeniz', start: '#0b8969', end: '#046684' },
     { label: 'Sahil', start: '#0ea5e9', end: '#2563eb' },
@@ -42,7 +42,9 @@
       reservationStatus: []
     },
     activityLogs: [],
-    dashboardTimerId: 0
+    dashboardTimerId: 0,
+    reservations: [],
+    contactRequests: []
   };
 
   function getAuthSession() {
@@ -107,7 +109,7 @@
   function getDefaultSidebarPermissionsForRole(role) {
     const safeRole = normalizeUserRole(role);
     if (safeRole === USER_ROLES.PATRON) return SIDEBAR_PERMISSION_KEYS.slice();
-    if (safeRole === USER_ROLES.UST_YETKILI) return ['dashboardPanel', 'citiesPanel', 'hotelsPanel', 'usersPanel'];
+    if (safeRole === USER_ROLES.UST_YETKILI) return ['dashboardPanel', 'citiesPanel', 'hotelsPanel', 'usersPanel', 'reservationsPanel', 'contactPanel'];
     return ['dashboardPanel'];
   }
 
@@ -1812,6 +1814,213 @@
     });
   }
 
+  // ── Rezervasyon Yönetimi ──────────────────────────────────────────────────
+
+  const RESERVATION_STATUS_LABELS = {
+    confirmed: { label: 'Onaylı',      cls: 'status-confirmed' },
+    pending:   { label: 'Beklemede',   cls: 'status-pending'   },
+    cancelled: { label: 'İptal',       cls: 'status-cancelled' },
+    completed: { label: 'Tamamlandı',  cls: 'status-completed' },
+  };
+
+  function reservationStatusBadge(status) {
+    const s = RESERVATION_STATUS_LABELS[status] || { label: status, cls: '' };
+    return '<span class="status-badge ' + s.cls + '">' + escapeHtml(s.label) + '</span>';
+  }
+
+  function renderReservationsTable() {
+    const tbody = document.getElementById('reservationsTableBody');
+    if (!tbody) return;
+
+    if (!state.reservations.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="table-empty">Rezervasyon bulunamadı.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = state.reservations.map((r) => {
+      const checkIn  = r.checkIn  ? new Date(r.checkIn).toLocaleDateString('tr-TR')  : '-';
+      const checkOut = r.checkOut ? new Date(r.checkOut).toLocaleDateString('tr-TR') : '-';
+      const canConfirm  = r.status !== 'confirmed'  && r.status !== 'completed';
+      const canComplete = r.status === 'confirmed';
+      const canCancel   = r.status !== 'cancelled';
+
+      return '<tr>' +
+        '<td>' + r.id + '</td>' +
+        '<td><span title="' + escapeHtml(r.userEmail) + '">' + escapeHtml(r.userName || r.userEmail || '-') + '</span></td>' +
+        '<td>' + escapeHtml(r.hotelName || '-') + '</td>' +
+        '<td>' + checkIn + ' → ' + checkOut + '</td>' +
+        '<td>' + r.nights + ' gece / ' + r.guestCount + ' kişi</td>' +
+        '<td>₺' + (r.totalAmount || 0).toLocaleString('tr-TR') + '</td>' +
+        '<td>' + reservationStatusBadge(r.status) + '</td>' +
+        '<td class="action-cell">' +
+          (canConfirm  ? '<button class="btn-sm btn-success" data-res-id="' + r.id + '" data-res-action="confirmed">Onayla</button> '  : '') +
+          (canComplete ? '<button class="btn-sm btn-info"    data-res-id="' + r.id + '" data-res-action="completed">Tamamla</button> ' : '') +
+          (canCancel   ? '<button class="btn-sm btn-danger"  data-res-id="' + r.id + '" data-res-action="cancelled">İptal</button>'    : '') +
+        '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  async function refreshReservationsData() {
+    const filter = document.getElementById('reservationStatusFilter')?.value || '';
+    const url = '/api/admin/reservations' + (filter ? '?status=' + filter : '');
+    const data = await requestJson(url);
+    state.reservations = data.reservations || [];
+
+    const metricEl = document.getElementById('metricReservations');
+    if (metricEl) metricEl.textContent = state.reservations.length;
+
+    renderReservationsTable();
+  }
+
+  function bindReservationPanel() {
+    const refreshBtn = document.getElementById('refreshReservationsBtn');
+    if (refreshBtn && !refreshBtn.dataset.bound) {
+      refreshBtn.dataset.bound = 'true';
+      refreshBtn.addEventListener('click', async () => {
+        try { await refreshReservationsData(); showToast('Rezervasyonlar yenilendi.'); }
+        catch (e) { showToast(e.message, true); }
+      });
+    }
+
+    const filterEl = document.getElementById('reservationStatusFilter');
+    if (filterEl && !filterEl.dataset.bound) {
+      filterEl.dataset.bound = 'true';
+      filterEl.addEventListener('change', async () => {
+        try { await refreshReservationsData(); }
+        catch (e) { showToast(e.message, true); }
+      });
+    }
+
+    const tbody = document.getElementById('reservationsTableBody');
+    if (tbody && !tbody.dataset.bound) {
+      tbody.dataset.bound = 'true';
+      tbody.addEventListener('click', async (e) => {
+        const btn = e.target.closest('[data-res-id][data-res-action]');
+        if (!btn) return;
+
+        const id     = Number(btn.dataset.resId);
+        const action = btn.dataset.resAction;
+        const labels = { confirmed: 'Onayla', completed: 'Tamamla', cancelled: 'İptal et' };
+        const confirmed = await confirmAction(
+          labels[action] + '?',
+          '#' + id + ' numaralı rezervasyon ' + (labels[action] || action) + ' olarak işaretlensin mi?',
+          labels[action]
+        );
+        if (!confirmed) return;
+
+        try {
+          await requestJson('/api/admin/reservations/' + id + '/status', {
+            method: 'PUT',
+            body: JSON.stringify({ status: action })
+          });
+          showToast('Rezervasyon güncellendi.');
+          await refreshReservationsData();
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      });
+    }
+  }
+
+  // ── İletişim Talepleri ────────────────────────────────────────────────────
+
+  function renderContactRequestsTable() {
+    const tbody = document.getElementById('contactRequestsTableBody');
+    if (!tbody) return;
+
+    const newCount = state.contactRequests.filter((r) => r.status === 'new').length;
+    const countEl  = document.getElementById('contactRequestsNewCount');
+    if (countEl) countEl.textContent = newCount + ' yeni';
+
+    const badge = document.getElementById('sidebarContactBadge');
+    if (badge) {
+      badge.textContent = newCount || '';
+      badge.style.display = newCount ? '' : 'none';
+    }
+
+    const metricEl = document.getElementById('metricContactNew');
+    if (metricEl) metricEl.textContent = newCount;
+
+    if (!state.contactRequests.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="table-empty">İletişim talebi bulunamadı.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = state.contactRequests.map((r) => {
+      const date    = r.createdAt ? new Date(r.createdAt).toLocaleDateString('tr-TR') : '-';
+      const isNew   = r.status === 'new';
+      const rowCls  = isNew ? ' class="row-highlight"' : '';
+      const msgShort = escapeHtml((r.message || '').slice(0, 80)) + (r.message.length > 80 ? '…' : '');
+
+      return '<tr' + rowCls + '>' +
+        '<td>' + r.id + '</td>' +
+        '<td>' + escapeHtml(r.name) + '</td>' +
+        '<td><a href="mailto:' + escapeHtml(r.email) + '">' + escapeHtml(r.email) + '</a></td>' +
+        '<td>' + escapeHtml(r.subject || '-') + '</td>' +
+        '<td title="' + escapeHtml(r.message) + '">' + msgShort + '</td>' +
+        '<td><span class="status-badge ' + (isNew ? 'status-pending' : '') + '">' + (isNew ? 'Yeni' : 'Okundu') + '</span></td>' +
+        '<td>' + date + '</td>' +
+        '<td class="action-cell">' +
+          (isNew ? '<button class="btn-sm btn-info" data-contact-id="' + r.id + '" data-contact-action="read">Okundu</button> ' : '') +
+          '<button class="btn-sm btn-danger" data-contact-id="' + r.id + '" data-contact-action="delete">Sil</button>' +
+        '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  async function refreshContactRequestsData() {
+    const data = await requestJson('/api/admin/contact-requests');
+    state.contactRequests = data.contactRequests || [];
+    renderContactRequestsTable();
+  }
+
+  function bindContactPanel() {
+    const refreshBtn = document.getElementById('refreshContactRequestsBtn');
+    if (refreshBtn && !refreshBtn.dataset.bound) {
+      refreshBtn.dataset.bound = 'true';
+      refreshBtn.addEventListener('click', async () => {
+        try { await refreshContactRequestsData(); showToast('İletişim talepleri yenilendi.'); }
+        catch (e) { showToast(e.message, true); }
+      });
+    }
+
+    const tbody = document.getElementById('contactRequestsTableBody');
+    if (tbody && !tbody.dataset.bound) {
+      tbody.dataset.bound = 'true';
+      tbody.addEventListener('click', async (e) => {
+        const btn = e.target.closest('[data-contact-id]');
+        if (!btn) return;
+
+        const id     = Number(btn.dataset.contactId);
+        const action = btn.dataset.contactAction;
+
+        if (action === 'read') {
+          try {
+            await requestJson('/api/admin/contact-requests/' + id + '/status', {
+              method: 'PUT',
+              body: JSON.stringify({ status: 'read' })
+            });
+            showToast('Okundu olarak işaretlendi.');
+            await refreshContactRequestsData();
+          } catch (err) { showToast(err.message, true); }
+          return;
+        }
+
+        if (action === 'delete') {
+          const ok = await confirmAction('Talep silinsin mi?', '#' + id + ' numaralı talep kalıcı olarak silinecek.', 'Sil');
+          if (!ok) return;
+          try {
+            await requestJson('/api/admin/contact-requests/' + id, { method: 'DELETE' });
+            showToast('Talep silindi.');
+            await refreshContactRequestsData();
+          } catch (err) { showToast(err.message, true); }
+        }
+      });
+    }
+  }
+
+  // ── bindForms ─────────────────────────────────────────────────────────────
   function bindForms() {
     const adminLogoutBtn = document.getElementById('adminLogoutBtn');
     if (adminLogoutBtn) {
@@ -2260,7 +2469,9 @@
         window.location.href = '/admin?denied=1';
         return;
       }
-      await Promise.all([refreshCatalogData(), refreshApiModules(), refreshApiIntegrations(), refreshUsersData(), refreshDashboardInsights(), refreshActivityLogs()]);
+      await Promise.all([refreshCatalogData(), refreshApiModules(), refreshApiIntegrations(), refreshUsersData(), refreshDashboardInsights(), refreshActivityLogs(), refreshReservationsData(), refreshContactRequestsData()]);
+      bindReservationPanel();
+      bindContactPanel();
       startDashboardLiveTimer();
       setApiStatus('online', 'API bagli');
     } catch (error) {

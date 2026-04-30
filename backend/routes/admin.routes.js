@@ -860,6 +860,157 @@ function registerAdminRoutes(app, deps) {
       handleApiError(res, error);
     }
   });
+
+  // ── Rezervasyon Yönetimi ────────────────────────────────────────────────────
+  app.get('/api/admin/reservations', async (req, res) => {
+    try {
+      const statusFilter = String(req.query.status || '').trim().toLowerCase();
+      const rows = statusFilter
+        ? (await pool.query(
+            `SELECT r.*, u.name AS user_name, u.email AS user_email, h.name AS hotel_name
+             FROM reservations r
+             LEFT JOIN app_users u ON u.id = r.user_id
+             LEFT JOIN hotels    h ON h.id = r.hotel_id
+             WHERE r.status = $1
+             ORDER BY r.created_at DESC LIMIT 500`,
+            [statusFilter]
+          )).rows
+        : (await pool.query(
+            `SELECT r.*, u.name AS user_name, u.email AS user_email, h.name AS hotel_name
+             FROM reservations r
+             LEFT JOIN app_users u ON u.id = r.user_id
+             LEFT JOIN hotels    h ON h.id = r.hotel_id
+             ORDER BY r.created_at DESC LIMIT 500`
+          )).rows;
+
+      res.json({
+        reservations: rows.map((row) => ({
+          id: row.id,
+          userId: row.user_id,
+          userName: row.user_name || '',
+          userEmail: row.user_email || '',
+          hotelId: row.hotel_id,
+          hotelName: row.hotel_name || '',
+          roomTypeId: row.room_type_id,
+          checkIn: row.check_in,
+          checkOut: row.check_out,
+          guestCount: row.guest_count,
+          nights: row.nights,
+          baseAmount: Number(row.base_amount) || 0,
+          discountAmount: Number(row.discount_amount) || 0,
+          totalAmount: Number(row.total_amount) || 0,
+          status: row.status,
+          couponCode: row.coupon_code || '',
+          cancelReason: row.cancel_reason || '',
+          createdAt: row.created_at ? new Date(row.created_at).toISOString() : '',
+        }))
+      });
+    } catch (error) {
+      handleApiError(res, error);
+    }
+  });
+
+  app.put('/api/admin/reservations/:id/status', async (req, res) => {
+    try {
+      const reservationId = toPositiveInteger(req.params.id);
+      if (!reservationId) {
+        res.status(400).json({ message: 'Geçerli bir rezervasyon ID girin.' });
+        return;
+      }
+
+      const newStatus = String(req.body?.status || '').trim().toLowerCase();
+      const allowed = ['confirmed', 'cancelled', 'completed', 'pending'];
+      if (!allowed.includes(newStatus)) {
+        res.status(400).json({ message: 'Geçersiz durum. İzin verilenler: ' + allowed.join(', ') });
+        return;
+      }
+
+      const note = String(req.body?.note || '').trim() || 'Admin tarafından güncellendi.';
+      const actorId = toPositiveInteger(req.auth?.userId);
+
+      const existing = await pool.query('SELECT * FROM reservations WHERE id = $1 LIMIT 1', [reservationId]);
+      if (!existing.rows.length) {
+        res.status(404).json({ message: 'Rezervasyon bulunamadı.' });
+        return;
+      }
+
+      const oldStatus = existing.rows[0].status;
+      await pool.query('BEGIN');
+      try {
+        const updated = await pool.query(
+          `UPDATE reservations SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
+          [newStatus, reservationId]
+        );
+        await pool.query(
+          `INSERT INTO reservation_status_logs (reservation_id, old_status, new_status, note, actor_user_id)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [reservationId, oldStatus, newStatus, note, actorId || null]
+        );
+        await pool.query('COMMIT');
+        res.json({ message: 'Rezervasyon durumu güncellendi.', reservation: updated.rows[0] });
+      } catch (err) {
+        await pool.query('ROLLBACK');
+        throw err;
+      }
+    } catch (error) {
+      handleApiError(res, error);
+    }
+  });
+
+  // ── İletişim Talepleri ──────────────────────────────────────────────────────
+  app.get('/api/admin/contact-requests', async (_req, res) => {
+    try {
+      const result = await pool.query(
+        `SELECT * FROM contact_requests ORDER BY created_at DESC LIMIT 500`
+      );
+      res.json({
+        contactRequests: result.rows.map((row) => ({
+          id: row.id,
+          name: row.name,
+          email: row.email,
+          subject: row.subject || '',
+          message: row.message,
+          status: row.status,
+          createdAt: row.created_at ? new Date(row.created_at).toISOString() : '',
+        }))
+      });
+    } catch (error) {
+      handleApiError(res, error);
+    }
+  });
+
+  app.put('/api/admin/contact-requests/:id/status', async (req, res) => {
+    try {
+      const id = toPositiveInteger(req.params.id);
+      if (!id) { res.status(400).json({ message: 'Geçerli bir ID girin.' }); return; }
+
+      const newStatus = String(req.body?.status || 'read').trim().toLowerCase();
+      const result = await pool.query(
+        `UPDATE contact_requests SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING id`,
+        [newStatus, id]
+      );
+      if (!result.rows.length) { res.status(404).json({ message: 'Talep bulunamadı.' }); return; }
+      res.json({ message: 'Durum güncellendi.' });
+    } catch (error) {
+      handleApiError(res, error);
+    }
+  });
+
+  app.delete('/api/admin/contact-requests/:id', async (req, res) => {
+    try {
+      const id = toPositiveInteger(req.params.id);
+      if (!id) { res.status(400).json({ message: 'Geçerli bir ID girin.' }); return; }
+
+      const result = await pool.query(
+        `DELETE FROM contact_requests WHERE id = $1 RETURNING id`,
+        [id]
+      );
+      if (!result.rows.length) { res.status(404).json({ message: 'Talep bulunamadı.' }); return; }
+      res.json({ message: 'Talep silindi.' });
+    } catch (error) {
+      handleApiError(res, error);
+    }
+  });
 }
 
 module.exports = registerAdminRoutes;

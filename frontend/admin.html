@@ -34,6 +34,8 @@
         <button type="button" class="sidebar-link" data-panel-target="hotelsPanel" data-icon="OT">Otel Yönetimi</button>
         <button type="button" class="sidebar-link" data-panel-target="apisPanel" data-icon="API">API Bağlantıları</button>
         <button type="button" class="sidebar-link" data-panel-target="usersPanel" data-icon="KL">Kullanıcılar</button>
+        <button type="button" class="sidebar-link" data-panel-target="reservationsPanel" data-icon="RZ">Rezervasyonlar</button>
+        <button type="button" class="sidebar-link" data-panel-target="contactPanel" data-icon="MS">İletişim Talepleri <span id="sidebarContactBadge" class="sidebar-badge" style="display:none"></span></button>
       </nav>
 
       <section class="sidebar-api-monitor" aria-label="API bağlantı özeti">
@@ -102,6 +104,14 @@
           <article class="metric-card">
             <h3>Ortalama Gece Fiyati</h3>
             <strong id="metricAveragePrice">₺0</strong>
+          </article>
+          <article class="metric-card">
+            <h3>Toplam Rezervasyon</h3>
+            <strong id="metricReservations">0</strong>
+          </article>
+          <article class="metric-card">
+            <h3>Yeni İletişim</h3>
+            <strong id="metricContactNew">0</strong>
           </article>
         </div>
 
@@ -539,6 +549,80 @@
                   </tr>
                 </thead>
                 <tbody id="activeUsersTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ======= REZERVASYONLAR PANELİ ======= -->
+      <section id="reservationsPanel" class="admin-panel" aria-label="Rezervasyon yönetimi">
+        <div class="panel-layout panel-layout-full">
+          <article class="panel-card table-card">
+            <div class="card-head">
+              <h3>Rezervasyonlar</h3>
+              <div class="card-head-actions">
+                <select id="reservationStatusFilter" class="admin-select">
+                  <option value="">Tüm Durumlar</option>
+                  <option value="pending">Beklemede</option>
+                  <option value="confirmed">Onaylı</option>
+                  <option value="cancelled">İptal</option>
+                  <option value="completed">Tamamlandı</option>
+                </select>
+                <button type="button" id="refreshReservationsBtn" class="btn-secondary">Yenile</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="admin-table" aria-label="Rezervasyon listesi">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Misafir</th>
+                    <th>Otel</th>
+                    <th>Giriş / Çıkış</th>
+                    <th>Gece / Kişi</th>
+                    <th>Tutar</th>
+                    <th>Durum</th>
+                    <th>İşlem</th>
+                  </tr>
+                </thead>
+                <tbody id="reservationsTableBody">
+                  <tr><td colspan="8" class="table-empty">Yükleniyor...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ======= İLETİŞİM TALEPLERİ PANELİ ======= -->
+      <section id="contactPanel" class="admin-panel" aria-label="İletişim talepleri">
+        <div class="panel-layout panel-layout-full">
+          <article class="panel-card table-card">
+            <div class="card-head">
+              <h3>İletişim Talepleri</h3>
+              <div class="card-head-actions">
+                <span id="contactRequestsNewCount" class="count-pill">0 yeni</span>
+                <button type="button" id="refreshContactRequestsBtn" class="btn-secondary">Yenile</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="admin-table" aria-label="İletişim talepleri">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Ad</th>
+                    <th>E-posta</th>
+                    <th>Konu</th>
+                    <th>Mesaj</th>
+                    <th>Durum</th>
+                    <th>Tarih</th>
+                    <th>İşlem</th>
+                  </tr>
+                </thead>
+                <tbody id="contactRequestsTableBody">
+                  <tr><td colspan="8" class="table-empty">Yükleniyor...</td></tr>
+                </tbody>
               </table>
             </div>
           </article>

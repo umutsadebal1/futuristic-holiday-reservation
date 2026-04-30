@@ -208,6 +208,35 @@ function registerPublicRoutes(app, deps) {
       handleApiError(res, error);
     }
   });
+
+  // ── İletişim Formu ──────────────────────────────────────────────────────────
+  app.post('/api/contact', async (req, res) => {
+    try {
+      const name    = String(req.body?.name    || '').trim();
+      const email   = String(req.body?.email   || '').trim();
+      const subject = String(req.body?.subject || '').trim();
+      const message = String(req.body?.message || '').trim();
+
+      if (!name || !email || !message) {
+        res.status(400).json({ message: 'Ad, e-posta ve mesaj zorunludur.' });
+        return;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        res.status(400).json({ message: 'Geçerli bir e-posta adresi girin.' });
+        return;
+      }
+
+      await pool.query(
+        `INSERT INTO contact_requests (name, email, subject, message) VALUES ($1, $2, $3, $4)`,
+        [name, email, subject, message]
+      );
+
+      res.status(201).json({ message: 'Mesajınız alındı. En kısa sürede dönüş yapacağız.' });
+    } catch (error) {
+      handleApiError(res, error);
+    }
+  });
 }
 
 module.exports = registerPublicRoutes;

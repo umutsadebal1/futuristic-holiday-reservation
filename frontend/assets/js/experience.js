@@ -1600,10 +1600,42 @@
     const contactForm = document.getElementById('contactForm');
     if (!contactForm || contactForm.dataset.bound === 'true') return;
 
-    contactForm.addEventListener('submit', (event) => {
+    contactForm.addEventListener('submit', async (event) => {
       event.preventDefault();
-      alert('Mesajınız alındı. En kısa sürede dönüş yapacağız.');
-      contactForm.reset();
+
+      const nameEl    = contactForm.querySelector('input[type="text"]');
+      const emailEl   = contactForm.querySelector('input[type="email"]');
+      const subjectEl = contactForm.querySelector('input[name="subject"]');
+      const msgEl     = contactForm.querySelector('textarea');
+      const submitBtn = contactForm.querySelector('button[type="submit"]');
+
+      const name    = (nameEl?.value    || '').trim();
+      const email   = (emailEl?.value   || '').trim();
+      const subject = (subjectEl?.value || '').trim();
+      const message = (msgEl?.value     || '').trim();
+
+      if (!name || !email || !message) {
+        alert('Lütfen ad, e-posta ve mesaj alanlarını doldurun.');
+        return;
+      }
+
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Gönderiliyor...'; }
+
+      try {
+        const res = await fetch(buildApiUrl('/api/contact'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, subject, message })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.message || 'Mesaj gönderilemedi.');
+        alert(data.message || 'Mesajınız alındı. En kısa sürede dönüş yapacağız.');
+        contactForm.reset();
+      } catch (err) {
+        alert(err.message || 'Mesaj gönderilirken bir hata oluştu.');
+      } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Mesaj Gönder'; }
+      }
     });
 
     contactForm.dataset.bound = 'true';
