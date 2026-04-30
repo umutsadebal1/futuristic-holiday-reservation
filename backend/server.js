@@ -1,5 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const compression = require('compression');
+const morgan = require('morgan');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -10,7 +13,6 @@ const fsSync = require('fs');
 const path = require('path');
 const http = require('http');
 const https = require('https');
-const vm = require('vm');
 const selfsigned = require('selfsigned');
 const pool = require('./db');
 const registerRoutes = require('./routes/register-routes');
@@ -37,11 +39,26 @@ const MAINTENANCE_MODE = String(process.env.MAINTENANCE_MODE || '').trim().toLow
 const MAINTENANCE_MESSAGE = String(process.env.MAINTENANCE_MESSAGE || '').trim();
 const MAINTENANCE_TOKEN_TTL = String(process.env.MAINTENANCE_TOKEN_TTL || '12h').trim();
 const MAINTENANCE_BOOTSTRAP_KEY = String(process.env.MAINTENANCE_BOOTSTRAP_KEY || '').trim();
+const ALLOWED_ORIGINS = String(process.env.ALLOWED_ORIGINS || '')
+  .split(',').map(s => s.trim()).filter(Boolean);
 
+// ── Security & Parsing Middleware ──────────────────────────────────────────
 app.use(cors({
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Maintenance-Token']
+  origin: ALLOWED_ORIGINS.length
+    ? (origin, cb) => cb(null, !origin || ALLOWED_ORIGINS.includes(origin))
+    : true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Maintenance-Token'],
+  credentials: true,
 }));
-app.use(express.json());
+app.use(helmet({
+  contentSecurityPolicy: false,           // HTML meta tags handle CSP
+  crossOriginResourcePolicy: { policy: 'cross-origin' }, // uploaded images
+}));
+app.use(compression());
+if (process.env.NODE_ENV !== 'test') {
+  app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+}
+app.use(express.json({ limit: '1mb' }));
 app.set('trust proxy', 1);
 
 const authLimiter = rateLimit({
@@ -49,7 +66,15 @@ const authLimiter = rateLimit({
   max: 40,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { message: 'Cok fazla giris denemesi yapildi. Lutfen daha sonra tekrar deneyin.' }
+  message: { message: 'Çok fazla giriş denemesi yapıldı. Lütfen daha sonra tekrar deneyin.' }
+});
+
+const generalApiLimiter = rateLimit({
+  windowMs: 60 * 1000,   // 1 dakika
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Çok fazla istek gönderildi. Lütfen bir dakika bekleyin.' }
 });
 
 const uploadRoot = path.join(__dirname, 'uploads');
@@ -181,6 +206,7 @@ if (REQUIRE_HTTPS) {
   });
 }
 
+app.use('/api', generalApiLimiter);
 app.use('/api', maintenanceGuard);
 app.use('/api', moduleKillSwitchMiddleware);
 app.use(staticMaintenanceGate);

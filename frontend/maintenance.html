@@ -4,59 +4,160 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; img-src 'self' data: https:; connect-src 'self' http://localhost:5000 https://localhost:5000 https://localhost:5443; frame-ancestors 'none'; base-uri 'self';">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070707">
   <title>TatilRezerve | Bakım Modu</title>
   <meta name="api-base" content="">
   <link rel="icon" type="image/png" href="img/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Archivo:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,600;0,700;0,900;1,900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/maintenance.css">
 </head>
 <body>
-  <div class="maint-bg" aria-hidden="true">
-    <ul class="maint-bg-track" id="maintenanceSliderTrack">
-      <li class="maint-bg-slide is-active" style="background-image:url('img/anthero.jpg')"></li>
-      <li class="maint-bg-slide" style="background-image:url('img/bodhero.jpg')"></li>
-      <li class="maint-bg-slide" style="background-image:url('img/rizhero.jpg')"></li>
-      <li class="maint-bg-slide" style="background-image:url('img/istreg.jpg')"></li>
-      <li class="maint-bg-slide" style="background-image:url('img/burhero.jpg')"></li>
-      <li class="maint-bg-slide" style="background-image:url('img/diyhero.jpg')"></li>
-    </ul>
-    <div class="maint-bg-overlay"></div>
+
+  <!-- ======= SITE LOADER ======= -->
+  <div class="site-loader" id="siteLoader" aria-hidden="true">
+    <div class="loader-wordmark-shell">
+      <div class="loader-wordmark" data-text="TATİLREZERVE">
+        <span class="loader-wordmark-text">TATİLREZERVE</span>
+        <span class="loader-wordmark-eaten" aria-hidden="true">TATİLREZERVE</span>
+        <div class="loader-chomp" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div class="loader-copy">
+      <div class="loader-motto-shell">
+        <p class="loader-motto">Tatil planlarınız bizde güvende.</p>
+        <p class="loader-motto-eaten" aria-hidden="true">Tatil planlarınız bizde güvende.</p>
+      </div>
+    </div>
   </div>
 
-  <main class="maint-stage">
-    <section class="maint-card" data-autoplay-interval="4500">
-      <div class="maint-card-head">
-        <img src="img/logo.png" alt="TatilRezerve" class="maint-card-logo">
-        <div class="maint-card-titles">
-          <span id="maintenanceStatusText" class="maint-card-badge">Bakım Modu Aktif</span>
-          <h1 class="maint-card-title">Bakım Modunda</h1>
+  <!-- ======= FIXED NAV ======= -->
+  <header class="hero-nav" id="top">
+    <div class="brand-lockup">
+      <img src="img/logo.png" alt="" class="brand-logo" aria-hidden="true">
+      <span class="brand-mark">
+        <span class="char-reveal" style="--d:0">T</span><span
+          class="char-reveal" style="--d:1">a</span><span
+          class="char-reveal" style="--d:2">t</span><span
+          class="char-reveal" style="--d:3">i</span><span
+          class="char-reveal" style="--d:4">l</span>
+      </span>
+      <span class="brand-text">
+        <span class="char-reveal" style="--d:5">R</span><span
+          class="char-reveal" style="--d:6">e</span><span
+          class="char-reveal" style="--d:7">z</span><span
+          class="char-reveal" style="--d:8">e</span><span
+          class="char-reveal" style="--d:9">r</span><span
+          class="char-reveal" style="--d:10">v</span><span
+          class="char-reveal" style="--d:11">e</span>
+      </span>
+    </div>
+  </header>
+
+  <!-- ======= HERO SCREEN ======= -->
+  <main class="hero-screen">
+
+    <!-- Background slideshow -->
+    <div class="hero-bg-shell" aria-hidden="true" id="heroBgShell">
+      <div class="hero-bg-slide is-active" style="background-image:url('img/anthero.jpg')"></div>
+      <div class="hero-bg-slide" style="background-image:url('img/bodhero.jpg')"></div>
+      <div class="hero-bg-slide" style="background-image:url('img/rizhero.jpg')"></div>
+      <div class="hero-bg-slide" style="background-image:url('img/istreg.jpg')"></div>
+      <div class="hero-bg-slide" style="background-image:url('img/burhero.jpg')"></div>
+      <div class="hero-bg-slide" style="background-image:url('img/diyhero.jpg')"></div>
+      <div class="hero-bg-overlay"></div>
+    </div>
+
+    <!-- Editorial content -->
+    <div class="hero-editorial">
+      <p class="hero-kicker">Sistem güncelleniyor. Kısa süre içinde geri döneceğiz.</p>
+      <h1 class="hero-manifesto">
+        <span class="hero-line">
+          <span class="hero-line-accent">TatilRezerve,</span> çok yakında geri dönüyor.
+        </span>
+      </h1>
+      <p id="maintenanceMessage" class="hero-subcopy">
+        Sistem şu an bakımda. Rezervasyon ve tatil planlama hizmetlerimiz kısa süre içinde tekrar sizlerle olacak.
+      </p>
+    </div>
+
+    <!-- Subtle admin hint (bottom-right) -->
+    <div class="access-hint" aria-hidden="true">
+      <span class="access-hint-dot"></span>
+    </div>
+
+  </main>
+
+  <!-- ======= MARQUEE ======= -->
+  <section class="marquee-section" aria-label="Kaydıran bant">
+    <div class="marquee-shell">
+      <div class="marquee-track">
+        <div class="marquee-group" aria-hidden="false">
+          <span class="marquee-item">TATİLREZERVE</span>
+          <span class="marquee-item marquee-item-accent">BAKIM MODU</span>
+          <span class="marquee-item">SİSTEM GÜNCELLENİYOR</span>
+          <span class="marquee-item">YAKINDA GERİ DÖNECEĞİZ</span>
+          <span class="marquee-item">TATİL PLANLAMA</span>
+          <span class="marquee-item marquee-item-accent">TATİLREZERVE</span>
+          <span class="marquee-item">REZERVASYON SİSTEMİ</span>
+          <span class="marquee-item">BAKIM MODU</span>
+          <span class="marquee-item">SİSTEM GÜNCELLENİYOR</span>
+          <span class="marquee-item">YAKINDA GERİ DÖNECEĞİZ</span>
+          <span class="marquee-item">TATİL PLANLAMA</span>
+          <span class="marquee-item marquee-item-accent">TATİLREZERVE</span>
+        </div>
+        <div class="marquee-group" aria-hidden="true">
+          <span class="marquee-item">TATİLREZERVE</span>
+          <span class="marquee-item marquee-item-accent">BAKIM MODU</span>
+          <span class="marquee-item">SİSTEM GÜNCELLENİYOR</span>
+          <span class="marquee-item">YAKINDA GERİ DÖNECEĞİZ</span>
+          <span class="marquee-item">TATİL PLANLAMA</span>
+          <span class="marquee-item marquee-item-accent">TATİLREZERVE</span>
+          <span class="marquee-item">REZERVASYON SİSTEMİ</span>
+          <span class="marquee-item">BAKIM MODU</span>
+          <span class="marquee-item">SİSTEM GÜNCELLENİYOR</span>
+          <span class="marquee-item">YAKINDA GERİ DÖNECEĞİZ</span>
+          <span class="marquee-item">TATİL PLANLAMA</span>
+          <span class="marquee-item marquee-item-accent">TATİLREZERVE</span>
         </div>
       </div>
+    </div>
+  </section>
 
-      <p id="maintenanceMessage" class="maint-card-text">
-        Sistem şu anda bakımda. Erişim için yetkili anahtarını girin veya daha sonra tekrar deneyin.
-      </p>
+  <!-- ======= KEY OVERLAY (Ctrl+Shift+K) ======= -->
+  <div class="key-overlay" id="keyOverlay" role="dialog" aria-modal="true" aria-label="Yetkili Erişim" aria-hidden="true">
+    <div class="key-panel">
 
-      <form id="maintenanceKeyForm" class="maint-card-form" autocomplete="off">
-        <label for="maintenanceKeyInput" class="maint-card-label">Erişim Anahtarı</label>
-        <div class="maint-card-row">
+      <button class="key-panel-close" id="keyPanelClose" type="button" aria-label="Kapat">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="key-panel-head">
+        <span id="maintenanceStatusText" class="key-panel-badge">Bakım Modu Aktif</span>
+        <h2 class="key-panel-title">Yetkili Erişim</h2>
+        <p class="key-panel-desc">Bakım anahtarınızı girerek sisteme erişebilirsiniz.</p>
+      </div>
+
+      <form id="maintenanceKeyForm" class="key-panel-form" autocomplete="off">
+        <label for="maintenanceKeyInput" class="key-panel-label">Erişim Anahtarı</label>
+        <div class="key-panel-row">
           <input id="maintenanceKeyInput" type="password" placeholder="TRZ-xxxxxxxxxx" required autocomplete="off">
-          <button id="maintenanceSubmitBtn" type="submit" class="maint-card-btn">Erişim</button>
+          <button id="maintenanceSubmitBtn" type="submit" class="key-panel-btn">Erişim</button>
         </div>
-        <p id="maintenanceErrorText" class="maint-card-error" role="alert"></p>
+        <p id="maintenanceErrorText" class="key-panel-error" role="alert"></p>
       </form>
 
-      <div class="maint-card-footer">
-        <button id="maintenanceContinueBtn" class="maint-card-link hidden" type="button">Ana Sayfaya Dön</button>
-        <span class="maint-card-note">Güvenlik notu: Anahtar sistem tarafından kontrol edilir.</span>
+      <div class="key-panel-footer">
+        <button id="maintenanceContinueBtn" class="key-panel-link hidden" type="button">Ana Sayfaya Dön</button>
+        <span class="key-panel-note">Anahtar şifreli olarak doğrulanır.</span>
       </div>
 
-      <div class="maint-card-dots" id="maintenanceSliderDots" aria-hidden="true"></div>
-    </section>
-  </main>
+    </div>
+  </div>
 
   <script src="assets/js/maintenance.js"></script>
 </body>

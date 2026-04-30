@@ -2,42 +2,30 @@
   'use strict';
 
   const STORAGE_KEY = 'maintenanceAccessToken';
-  const statusText = document.getElementById('maintenanceStatusText');
+
+  const statusText  = document.getElementById('maintenanceStatusText');
   const messageText = document.getElementById('maintenanceMessage');
-  const errorText = document.getElementById('maintenanceErrorText');
-  const form = document.getElementById('maintenanceKeyForm');
-  const input = document.getElementById('maintenanceKeyInput');
-  const submitBtn = document.getElementById('maintenanceSubmitBtn');
+  const errorText   = document.getElementById('maintenanceErrorText');
+  const form        = document.getElementById('maintenanceKeyForm');
+  const input       = document.getElementById('maintenanceKeyInput');
+  const submitBtn   = document.getElementById('maintenanceSubmitBtn');
   const continueBtn = document.getElementById('maintenanceContinueBtn');
-  const sliderTrack = document.getElementById('maintenanceSliderTrack');
-  const dotsHost = document.getElementById('maintenanceSliderDots');
+  const keyOverlay  = document.getElementById('keyOverlay');
+  const closeBtnEl  = document.getElementById('keyPanelClose');
+  const siteLoader  = document.getElementById('siteLoader');
+  const heroBgShell = document.getElementById('heroBgShell');
 
-  const setError = (message) => {
-    if (errorText) errorText.textContent = message || '';
-  };
-
-  const setStatus = (message) => {
-    if (statusText) statusText.textContent = message || '';
-  };
-
-  const setMessage = (message) => {
-    if (messageText) messageText.textContent = message || '';
-  };
+  /* ---- Helpers ---- */
+  const setError   = (m) => { if (errorText)   errorText.textContent   = m || ''; };
+  const setStatus  = (m) => { if (statusText)  statusText.textContent  = m || ''; };
+  const setMessage = (m) => { if (messageText) messageText.textContent = m || ''; };
 
   const getToken = () => {
-    try {
-      return String(localStorage.getItem(STORAGE_KEY) || '');
-    } catch (_e) {
-      return '';
-    }
+    try { return String(localStorage.getItem(STORAGE_KEY) || ''); } catch { return ''; }
   };
 
   const saveToken = (token) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, token);
-    } catch (_e) {
-      // ignore storage errors
-    }
+    try { localStorage.setItem(STORAGE_KEY, token); } catch { /* ignore */ }
   };
 
   const resolveApiBaseUrl = () => {
@@ -46,127 +34,123 @@
     const metaValue = meta ? String(meta.content || '').trim() : '';
     if (metaValue) return metaValue.replace(/\/+$/, '');
     const hostname = String(window.location.hostname || '').toLowerCase();
-    const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1';
+    const isLocal  = hostname === 'localhost' || hostname === '127.0.0.1';
     if (window.location.protocol === 'file:') return 'http://localhost:5000';
-    if (isLocalHost && window.location.port !== '5000' && window.location.port !== '5443') return 'http://localhost:5000';
+    if (isLocal && window.location.port !== '5000' && window.location.port !== '5443') return 'http://localhost:5000';
     return '';
   };
 
-  const buildApiUrl = (pathname) => {
-    const safePath = pathname.startsWith('/') ? pathname : '/' + pathname;
-    return resolveApiBaseUrl() + safePath;
-  };
+  const buildApiUrl = (path) => resolveApiBaseUrl() + (path.startsWith('/') ? path : '/' + path);
 
-  const fetchStatus = async () => {
-    try {
-      const response = await fetch(buildApiUrl('/api/maintenance/status'));
-      if (!response.ok) throw new Error('Bakim durumu alinamadi.');
-      const payload = await response.json();
-      if (payload && payload.message) {
-        setMessage(payload.message);
-      }
-      setStatus(payload?.enabled ? 'Bakım Modu Aktif' : 'Bakım Modu Kapalı');
-    } catch (_error) {
-      setStatus('Bakım Bilgisi Alınamadı');
-    }
-  };
+  /* ---- Site Loader ---- */
+  function initLoader() {
+    if (!siteLoader) return;
+    // Dismiss after chomp animation completes (~2.2 s)
+    setTimeout(() => siteLoader.classList.add('is-done'), 2200);
+  }
 
-  /* ---- Slider ---- */
-  function initSlider() {
-    if (!sliderTrack) return;
-    const slides = Array.from(sliderTrack.querySelectorAll('.maint-bg-slide'));
+  /* ---- Background Slideshow ---- */
+  function initHeroSlider() {
+    if (!heroBgShell) return;
+    const slides = Array.from(heroBgShell.querySelectorAll('.hero-bg-slide'));
     if (slides.length < 2) return;
 
-    if (dotsHost) {
-      dotsHost.innerHTML = slides.map((_, idx) => '<span class="maint-card-dot' + (idx === 0 ? ' is-active' : '') + '" data-slide-index="' + idx + '"></span>').join('');
-    }
-    const dots = dotsHost ? Array.from(dotsHost.querySelectorAll('.maint-card-dot')) : [];
-
-    let activeIndex = 0;
-    let timer = null;
-    const card = document.querySelector('.maint-card');
-    const intervalAttr = Number(card?.getAttribute('data-autoplay-interval') || 4500);
-    const interval = Number.isFinite(intervalAttr) && intervalAttr >= 1500 ? intervalAttr : 4500;
-
-    const goTo = (nextIndex) => {
-      const next = ((nextIndex % slides.length) + slides.length) % slides.length;
-      if (next === activeIndex) return;
-      slides[activeIndex].classList.remove('is-active');
-      slides[next].classList.add('is-active');
-      if (dots[activeIndex]) dots[activeIndex].classList.remove('is-active');
-      if (dots[next]) dots[next].classList.add('is-active');
-      activeIndex = next;
+    let active = 0;
+    const advance = () => {
+      slides[active].classList.remove('is-active');
+      active = (active + 1) % slides.length;
+      slides[active].classList.add('is-active');
     };
 
-    const start = () => {
-      stop();
-      timer = window.setInterval(() => goTo(activeIndex + 1), interval);
-    };
-    const stop = () => {
-      if (timer) {
-        window.clearInterval(timer);
-        timer = null;
-      }
-    };
-
-    dots.forEach((dot) => {
-      dot.addEventListener('click', () => {
-        const idx = Number(dot.dataset.slideIndex || 0);
-        goTo(idx);
-        start();
-      });
-    });
-
+    let timer = setInterval(advance, 6000);
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) stop();
-      else start();
+      if (document.hidden) { clearInterval(timer); }
+      else                  { timer = setInterval(advance, 6000); }
     });
-
-    start();
   }
 
-  /* ---- Form ---- */
+  /* ---- Key Overlay ---- */
+  function openOverlay() {
+    if (!keyOverlay) return;
+    keyOverlay.classList.add('is-open');
+    keyOverlay.setAttribute('aria-hidden', 'false');
+    setTimeout(() => input && input.focus(), 300);
+  }
+
+  function closeOverlay() {
+    if (!keyOverlay) return;
+    keyOverlay.classList.remove('is-open');
+    keyOverlay.setAttribute('aria-hidden', 'true');
+    setError('');
+  }
+
+  /* Keyboard shortcut: Ctrl + Shift + K  (toggle) */
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && (e.key === 'K' || e.key === 'k')) {
+      e.preventDefault();
+      keyOverlay && keyOverlay.classList.contains('is-open') ? closeOverlay() : openOverlay();
+      return;
+    }
+    if (e.key === 'Escape' && keyOverlay && keyOverlay.classList.contains('is-open')) {
+      closeOverlay();
+    }
+  });
+
+  if (closeBtnEl) closeBtnEl.addEventListener('click', closeOverlay);
+
+  // Close on backdrop click
+  if (keyOverlay) {
+    keyOverlay.addEventListener('click', (e) => {
+      if (e.target === keyOverlay) closeOverlay();
+    });
+  }
+
+  /* ---- Fetch maintenance status ---- */
+  async function fetchStatus() {
+    try {
+      const res = await fetch(buildApiUrl('/api/maintenance/status'));
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (data && data.message) setMessage(data.message);
+      setStatus(data?.enabled ? 'Bakım Modu Aktif' : 'Bakım Modu Kapalı');
+    } catch {
+      setStatus('Bakım Bilgisi Alınamadı');
+    }
+  }
+
+  /* ---- Continue button ---- */
   if (continueBtn) {
-    continueBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
-    });
+    continueBtn.addEventListener('click', () => { window.location.href = 'index.html'; });
   }
 
+  /* ---- Key form submit ---- */
   if (form) {
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
       setError('');
 
       const rawKey = String(input?.value || '').trim();
-      if (!rawKey) {
-        setError('Lütfen erişim anahtarını girin.');
-        return;
-      }
+      if (!rawKey) { setError('Lütfen erişim anahtarını girin.'); return; }
 
       try {
         if (submitBtn) submitBtn.disabled = true;
-        setStatus('Anahtar Doğrulanıyor...');
+        setStatus('Anahtar Doğrulanıyor…');
 
-        const response = await fetch(buildApiUrl('/api/maintenance/verify'), {
+        const res = await fetch(buildApiUrl('/api/maintenance/verify'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ key: rawKey }),
-          credentials: 'same-origin'
+          credentials: 'same-origin',
         });
 
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok) {
-          throw new Error(payload?.message || 'Anahtar doğrulanamadı.');
-        }
-
-        if (!payload?.token) {
-          throw new Error('Erişim tokeni üretilmedi.');
-        }
+        const payload = await res.json().catch(() => ({}));
+        if (!res.ok)        throw new Error(payload?.message || 'Anahtar doğrulanamadı.');
+        if (!payload?.token) throw new Error('Erişim tokeni üretilmedi.');
 
         saveToken(payload.token);
         window.location.href = 'index.html';
-      } catch (error) {
-        setError(error.message || 'Anahtar doğrulanamadı.');
+      } catch (err) {
+        setError(err.message || 'Anahtar doğrulanamadı.');
         setStatus('Bakım Modu Aktif');
       } finally {
         if (submitBtn) submitBtn.disabled = false;
@@ -174,11 +158,12 @@
     });
   }
 
-  const existingToken = getToken();
-  if (existingToken && continueBtn) {
-    continueBtn.classList.remove('hidden');
-  }
+  /* ---- Init ---- */
+  const existing = getToken();
+  if (existing && continueBtn) continueBtn.classList.remove('hidden');
 
-  initSlider();
+  initLoader();
+  initHeroSlider();
   fetchStatus();
+
 })();
