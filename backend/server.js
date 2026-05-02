@@ -54,6 +54,11 @@ app.use(helmet({
   contentSecurityPolicy: false,           // HTML meta tags handle CSP
   crossOriginResourcePolicy: { policy: 'cross-origin' }, // uploaded images
 }));
+// frame-ancestors meta tag'de görmezden gelinir; HTTP header zorunlu
+app.use((_req, res, next) => {
+  res.setHeader('Content-Security-Policy', "frame-ancestors 'none'");
+  next();
+});
 app.use(compression());
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
@@ -1245,6 +1250,19 @@ async function ensureSchema() {
   for (const statement of contactRequestAlterStatements) {
     await pool.query(statement);
   }
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS call_me_requests (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      preferred_hour TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'new',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await pool.query('CREATE INDEX IF NOT EXISTS call_me_requests_status_idx ON call_me_requests(status);');
 
   const cityRows = await pool.query('SELECT id, name, slug FROM cities ORDER BY id ASC');
   const usedSlugs = new Set();

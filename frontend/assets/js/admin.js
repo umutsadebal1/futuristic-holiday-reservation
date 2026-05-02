@@ -10,7 +10,7 @@
     ALT_YETKILI: 'alt_yetkili',
     KULLANICI: 'kullanici'
   };
-  const SIDEBAR_PERMISSION_KEYS = ['dashboardPanel', 'citiesPanel', 'hotelsPanel', 'apisPanel', 'usersPanel', 'reservationsPanel', 'contactPanel'];
+  const SIDEBAR_PERMISSION_KEYS = ['dashboardPanel', 'citiesPanel', 'hotelsPanel', 'apisPanel', 'usersPanel', 'reservationsPanel', 'contactPanel', 'callMePanel'];
   const CITY_PALETTE_PRESETS = [
     { label: 'Akdeniz', start: '#0b8969', end: '#046684' },
     { label: 'Sahil', start: '#0ea5e9', end: '#2563eb' },
@@ -44,7 +44,8 @@
     activityLogs: [],
     dashboardTimerId: 0,
     reservations: [],
-    contactRequests: []
+    contactRequests: [],
+    callMeRequests: []
   };
 
   function getAuthSession() {
@@ -109,7 +110,7 @@
   function getDefaultSidebarPermissionsForRole(role) {
     const safeRole = normalizeUserRole(role);
     if (safeRole === USER_ROLES.PATRON) return SIDEBAR_PERMISSION_KEYS.slice();
-    if (safeRole === USER_ROLES.UST_YETKILI) return ['dashboardPanel', 'citiesPanel', 'hotelsPanel', 'usersPanel', 'reservationsPanel', 'contactPanel'];
+    if (safeRole === USER_ROLES.UST_YETKILI) return ['dashboardPanel', 'citiesPanel', 'hotelsPanel', 'usersPanel', 'reservationsPanel', 'contactPanel', 'callMePanel'];
     return ['dashboardPanel'];
   }
 
@@ -1862,15 +1863,20 @@
   }
 
   async function refreshReservationsData() {
-    const filter = document.getElementById('reservationStatusFilter')?.value || '';
-    const url = '/api/admin/reservations' + (filter ? '?status=' + filter : '');
-    const data = await requestJson(url);
-    state.reservations = data.reservations || [];
+    try {
+      const filter = document.getElementById('reservationStatusFilter')?.value || '';
+      const url = '/api/admin/reservations' + (filter ? '?status=' + filter : '');
+      const data = await requestJson(url);
+      state.reservations = data.reservations || [];
 
-    const metricEl = document.getElementById('metricReservations');
-    if (metricEl) metricEl.textContent = state.reservations.length;
+      const metricEl = document.getElementById('metricReservations');
+      if (metricEl) metricEl.textContent = state.reservations.length;
 
-    renderReservationsTable();
+      renderReservationsTable();
+    } catch (err) {
+      const tbody = document.getElementById('reservationsTableBody');
+      if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="table-empty">Rezervasyonlar yüklenemedi: ' + escapeHtml(err.message || '') + '</td></tr>';
+    }
   }
 
   function bindReservationPanel() {
@@ -1970,9 +1976,14 @@
   }
 
   async function refreshContactRequestsData() {
-    const data = await requestJson('/api/admin/contact-requests');
-    state.contactRequests = data.contactRequests || [];
-    renderContactRequestsTable();
+    try {
+      const data = await requestJson('/api/admin/contact-requests');
+      state.contactRequests = data.contactRequests || [];
+      renderContactRequestsTable();
+    } catch (err) {
+      const tbody = document.getElementById('contactRequestsTableBody');
+      if (tbody) tbody.innerHTML = '<tr><td colspan="8" class="table-empty">İletişim talepleri yüklenemedi: ' + escapeHtml(err.message || '') + '</td></tr>';
+    }
   }
 
   function bindContactPanel() {
@@ -2014,6 +2025,103 @@
             await requestJson('/api/admin/contact-requests/' + id, { method: 'DELETE' });
             showToast('Talep silindi.');
             await refreshContactRequestsData();
+          } catch (err) { showToast(err.message, true); }
+        }
+      });
+    }
+  }
+
+  // ── Geri Arama Talepleri ─────────────────────────────────────────────────
+
+  function renderCallMeRequestsTable() {
+    const tbody = document.getElementById('callMeRequestsTableBody');
+    if (!tbody) return;
+
+    const newCount = state.callMeRequests.filter((r) => r.status === 'new').length;
+    const countEl  = document.getElementById('callMeRequestsNewCount');
+    if (countEl) countEl.textContent = newCount + ' yeni';
+
+    const badge = document.getElementById('sidebarCallMeBadge');
+    if (badge) {
+      badge.textContent = newCount || '';
+      badge.style.display = newCount ? '' : 'none';
+    }
+
+    if (!state.callMeRequests.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Geri arama talebi bulunamadı.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = state.callMeRequests.map((r) => {
+      const date  = r.createdAt ? new Date(r.createdAt).toLocaleDateString('tr-TR') : '-';
+      const isNew = r.status === 'new';
+      const rowCls = isNew ? ' class="row-highlight"' : '';
+
+      return '<tr' + rowCls + '>' +
+        '<td>' + r.id + '</td>' +
+        '<td>' + escapeHtml(r.name) + '</td>' +
+        '<td><a href="tel:' + escapeHtml(r.phone) + '">' + escapeHtml(r.phone) + '</a></td>' +
+        '<td>' + escapeHtml(r.preferredHour || '-') + '</td>' +
+        '<td><span class="status-badge ' + (isNew ? 'status-pending' : '') + '">' + (isNew ? 'Yeni' : 'Okundu') + '</span></td>' +
+        '<td>' + date + '</td>' +
+        '<td class="action-cell">' +
+          (isNew ? '<button class="btn-sm btn-info" data-callme-id="' + r.id + '" data-callme-action="read">Okundu</button> ' : '') +
+          '<button class="btn-sm btn-danger" data-callme-id="' + r.id + '" data-callme-action="delete">Sil</button>' +
+        '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  async function refreshCallMeRequestsData() {
+    try {
+      const data = await requestJson('/api/admin/call-me-requests');
+      state.callMeRequests = data.callMeRequests || [];
+      renderCallMeRequestsTable();
+    } catch (err) {
+      const tbody = document.getElementById('callMeRequestsTableBody');
+      if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Geri arama talepleri yüklenemedi: ' + escapeHtml(err.message || '') + '</td></tr>';
+    }
+  }
+
+  function bindCallMePanel() {
+    const refreshBtn = document.getElementById('refreshCallMeRequestsBtn');
+    if (refreshBtn && !refreshBtn.dataset.bound) {
+      refreshBtn.dataset.bound = 'true';
+      refreshBtn.addEventListener('click', async () => {
+        try { await refreshCallMeRequestsData(); showToast('Geri arama talepleri yenilendi.'); }
+        catch (e) { showToast(e.message, true); }
+      });
+    }
+
+    const tbody = document.getElementById('callMeRequestsTableBody');
+    if (tbody && !tbody.dataset.bound) {
+      tbody.dataset.bound = 'true';
+      tbody.addEventListener('click', async (e) => {
+        const btn = e.target.closest('[data-callme-id]');
+        if (!btn) return;
+
+        const id     = Number(btn.dataset.callmeId);
+        const action = btn.dataset.callmeAction;
+
+        if (action === 'read') {
+          try {
+            await requestJson('/api/admin/call-me-requests/' + id + '/status', {
+              method: 'PUT',
+              body: JSON.stringify({ status: 'read' })
+            });
+            showToast('Okundu olarak işaretlendi.');
+            await refreshCallMeRequestsData();
+          } catch (err) { showToast(err.message, true); }
+          return;
+        }
+
+        if (action === 'delete') {
+          const ok = await confirmAction('Talep silinsin mi?', '#' + id + ' numaralı talep kalıcı olarak silinecek.', 'Sil');
+          if (!ok) return;
+          try {
+            await requestJson('/api/admin/call-me-requests/' + id, { method: 'DELETE' });
+            showToast('Talep silindi.');
+            await refreshCallMeRequestsData();
           } catch (err) { showToast(err.message, true); }
         }
       });
@@ -2469,9 +2577,10 @@
         window.location.href = '/admin?denied=1';
         return;
       }
-      await Promise.all([refreshCatalogData(), refreshApiModules(), refreshApiIntegrations(), refreshUsersData(), refreshDashboardInsights(), refreshActivityLogs(), refreshReservationsData(), refreshContactRequestsData()]);
+      await Promise.all([refreshCatalogData(), refreshApiModules(), refreshApiIntegrations(), refreshUsersData(), refreshDashboardInsights(), refreshActivityLogs(), refreshReservationsData(), refreshContactRequestsData(), refreshCallMeRequestsData()]);
       bindReservationPanel();
       bindContactPanel();
+      bindCallMePanel();
       startDashboardLiveTimer();
       setApiStatus('online', 'API bagli');
     } catch (error) {

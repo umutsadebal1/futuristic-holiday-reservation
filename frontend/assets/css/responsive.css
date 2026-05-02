@@ -19,6 +19,47 @@ body {
   text-size-adjust: 100%;
 }
 
+/* Hamburger button — desktop'ta gizli */
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  color: inherit;
+}
+.hamburger-btn:hover {
+  background: rgba(0, 0, 0, 0.07);
+}
+body.dark-mode .hamburger-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.hamburger-btn span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.2s ease;
+}
+.header.nav-open .hamburger-btn span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.header.nav-open .hamburger-btn span:nth-child(2) {
+  opacity: 0;
+}
+.header.nav-open .hamburger-btn span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
 /* Touch targets: nothing under 44px */
 button,
 .btn,
@@ -48,7 +89,8 @@ button,
     min-height: 420px;
   }
 
-  .slider-content h1 {
+  .slider-content h1,
+  .slider-content h2 {
     font-size: clamp(1.6rem, 4vw, 2.6rem) !important;
   }
 
@@ -108,7 +150,7 @@ button,
     margin-top: 0.3rem;
   }
 
-  /* Header / navbar — collapse into stacked layout */
+  /* Header / navbar — hamburger menü */
   .header,
   .navbar {
     position: relative;
@@ -117,26 +159,43 @@ button,
     flex-wrap: wrap !important;
     gap: 0.5rem !important;
     padding: 0.6rem 0.9rem !important;
+    align-items: center;
+  }
+  .logo {
+    flex: 1;
   }
   .logo img {
     height: 60px !important;
     margin-right: 0 !important;
   }
-  .nav-links {
+  .hamburger-btn {
+    display: flex;
     order: 3;
+    flex-shrink: 0;
+  }
+  .header-actions {
+    order: 2;
+    gap: 0.5rem !important;
+  }
+  /* Nav links — mobilde varsayılan gizli */
+  .nav-links {
+    display: none !important;
+    order: 4;
     flex-basis: 100%;
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.5rem 0.85rem !important;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
-    padding-top: 0.5rem;
-    margin-top: 0.4rem;
+    padding: 0.75rem 0.5rem !important;
+    margin-top: 0.25rem;
+  }
+  /* Hamburger açık → nav görünür */
+  .header.nav-open .nav-links {
+    display: flex !important;
   }
   .nav-links a {
     font-size: 0.92rem;
-  }
-  .header-actions {
-    gap: 0.5rem !important;
+    padding: 0.4rem 0.6rem;
   }
   .auth-buttons-container,
   .auth-links {
@@ -153,7 +212,8 @@ button,
   .slider-content {
     padding: 0 1.2rem !important;
   }
-  .slider-content h1 {
+  .slider-content h1,
+  .slider-content h2 {
     font-size: clamp(1.4rem, 6.5vw, 2rem) !important;
     line-height: 1.15 !important;
   }
@@ -354,13 +414,18 @@ button,
 
   /* === City detail page === */
   .city-hero,
-  .city-hero-banner {
-    min-height: 280px !important;
+  .city-hero-banner,
+  .location-hero {
+    min-height: 220px !important;
     padding: 1.4rem 1rem !important;
   }
   .city-hero h1,
-  .city-hero-banner h1 {
+  .city-hero-banner h1,
+  .location-hero .hero-content h1 {
     font-size: clamp(1.4rem, 6vw, 2rem) !important;
+  }
+  .location-hero .hero-content p {
+    font-size: 1rem !important;
   }
   .hotel-list,
   .hotels-grid {
@@ -394,7 +459,7 @@ button,
 
   /* === Admin login === */
   .admin-login-shell {
-    flex-direction: column !important;
+    grid-template-columns: 1fr !important;
     padding: 1rem !important;
     gap: 1rem !important;
     min-height: 100vh;
@@ -446,7 +511,8 @@ button,
     font-size: 0.82rem !important;
   }
 
-  .slider-content h1 {
+  .slider-content h1,
+  .slider-content h2 {
     font-size: 1.35rem !important;
   }
   .slider-content p {

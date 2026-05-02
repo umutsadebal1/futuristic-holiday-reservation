@@ -1,6 +1,23 @@
 // Tema (Açık/Karanlık Mod) Seçicisini Başlat
 
 
+const initHamburger = () => {
+  const btn = document.getElementById('hamburgerBtn');
+  if (!btn) return;
+  const header = btn.closest('.header');
+  if (!header) return;
+  btn.addEventListener('click', () => {
+    const open = header.classList.toggle('nav-open');
+    btn.setAttribute('aria-expanded', String(open));
+  });
+  header.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      header.classList.remove('nav-open');
+      btn.setAttribute('aria-expanded', 'false');
+    });
+  });
+};
+
 const initThemeToggle = () => {
     // Tema butonunu ve localStorage'dan kaydedilen temayı al
     const themeToggle = document.getElementById('themeToggle');
@@ -3166,6 +3183,8 @@ async function searchResorts() {
 
 // Sayfa tamamen yüklendiğinde tüm başlatma işlevlerini çalıştır
 document.addEventListener("DOMContentLoaded", async () => {
+  // Hamburger menüyü başlat
+  initHamburger();
   // Tema değiştirme butonunu başlat
   initThemeToggle();
   initLoginModal();
