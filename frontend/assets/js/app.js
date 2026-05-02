@@ -1,5 +1,13 @@
-// Tema (Açık/Karanlık Mod) Seçicisini Başlat
-
+const initFilterToggle = () => {
+  const btn = document.getElementById('filterToggleBtn');
+  const filters = document.getElementById('advancedFilters');
+  if (!btn || !filters) return;
+  btn.addEventListener('click', () => {
+    const open = filters.classList.toggle('filters-open');
+    btn.setAttribute('aria-expanded', String(open));
+    btn.textContent = open ? '✕ Filtreyi Kapat' : '⚙ Filtrele';
+  });
+};
 
 const initHamburger = () => {
   const btn = document.getElementById('hamburgerBtn');
@@ -3185,6 +3193,7 @@ async function searchResorts() {
 document.addEventListener("DOMContentLoaded", async () => {
   // Hamburger menüyü başlat
   initHamburger();
+  initFilterToggle();
   // Tema değiştirme butonunu başlat
   initThemeToggle();
   initLoginModal();
