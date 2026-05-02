@@ -1266,21 +1266,31 @@
     }
 
     if (form && form.dataset.bound !== 'true') {
-      form.addEventListener('submit', (event) => {
+      form.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const payload = {
-          name: document.getElementById('callMeName')?.value || '',
-          phone: document.getElementById('callMePhone')?.value || '',
-          hour: document.getElementById('callMeHour')?.value || '',
-          createdAt: new Date().toISOString()
-        };
+        const name  = document.getElementById('callMeName')?.value || '';
+        const phone = document.getElementById('callMePhone')?.value || '';
+        const hour  = document.getElementById('callMeHour')?.value || '';
+        const submitBtn = form.querySelector('button[type="submit"]');
 
-        const old = readJSON(STORAGE_KEYS.callMeRequests, []);
-        old.unshift(payload);
-        writeJSON(STORAGE_KEYS.callMeRequests, old.slice(0, 30));
-        hideModalById('callMeModal');
-        form.reset();
-        alert('Geri arama talebiniz alındı. En kısa sürede sizi arayacağız.');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Gönderiliyor...'; }
+
+        try {
+          const res = await fetch(buildApiUrl('/api/call-me'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, phone, hour })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data?.message || 'Talep gönderilemedi.');
+          hideModalById('callMeModal');
+          form.reset();
+          alert(data.message || 'Geri arama talebiniz alındı. En kısa sürede sizi arayacağız.');
+        } catch (err) {
+          alert(err.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+        } finally {
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Gönder'; }
+        }
       });
       form.dataset.bound = 'true';
     }

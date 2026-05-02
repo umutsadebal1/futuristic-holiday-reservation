@@ -209,6 +209,29 @@ function registerPublicRoutes(app, deps) {
     }
   });
 
+  // ── Geri Arama Talebi ───────────────────────────────────────────────────────
+  app.post('/api/call-me', async (req, res) => {
+    try {
+      const name  = String(req.body?.name  || '').trim();
+      const phone = String(req.body?.phone || '').trim();
+      const hour  = String(req.body?.hour  || '').trim();
+
+      if (!name || !phone) {
+        res.status(400).json({ message: 'Ad ve telefon zorunludur.' });
+        return;
+      }
+
+      await pool.query(
+        `INSERT INTO call_me_requests (name, phone, preferred_hour) VALUES ($1, $2, $3)`,
+        [name, phone, hour]
+      );
+
+      res.status(201).json({ message: 'Geri arama talebiniz alındı. En kısa sürede sizi arayacağız.' });
+    } catch (error) {
+      handleApiError(res, error);
+    }
+  });
+
   // ── İletişim Formu ──────────────────────────────────────────────────────────
   app.post('/api/contact', async (req, res) => {
     try {

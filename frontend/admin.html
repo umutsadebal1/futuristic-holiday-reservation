@@ -36,6 +36,7 @@
         <button type="button" class="sidebar-link" data-panel-target="usersPanel" data-icon="KL">Kullanıcılar</button>
         <button type="button" class="sidebar-link" data-panel-target="reservationsPanel" data-icon="RZ">Rezervasyonlar</button>
         <button type="button" class="sidebar-link" data-panel-target="contactPanel" data-icon="MS">İletişim Talepleri <span id="sidebarContactBadge" class="sidebar-badge" style="display:none"></span></button>
+        <button type="button" class="sidebar-link" data-panel-target="callMePanel" data-icon="AR">Geri Arama <span id="sidebarCallMeBadge" class="sidebar-badge" style="display:none"></span></button>
       </nav>
 
       <section class="sidebar-api-monitor" aria-label="API bağlantı özeti">
@@ -112,6 +113,10 @@
           <article class="metric-card">
             <h3>Yeni İletişim</h3>
             <strong id="metricContactNew">0</strong>
+          </article>
+          <article class="metric-card">
+            <h3>Yeni Geri Arama</h3>
+            <strong id="metricCallMeNew">0</strong>
           </article>
         </div>
 
@@ -622,6 +627,39 @@
                 </thead>
                 <tbody id="contactRequestsTableBody">
                   <tr><td colspan="8" class="table-empty">Yükleniyor...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ======= GERİ ARAMA TALEPLERİ PANELİ ======= -->
+      <section id="callMePanel" class="admin-panel" aria-label="Geri arama talepleri">
+        <div class="panel-layout panel-layout-full">
+          <article class="panel-card table-card">
+            <div class="card-head">
+              <h3>Geri Arama Talepleri</h3>
+              <div class="card-head-actions">
+                <span id="callMeRequestsNewCount" class="count-pill">0 yeni</span>
+                <button type="button" id="refreshCallMeRequestsBtn" class="btn-secondary">Yenile</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="admin-table" aria-label="Geri arama talepleri">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Ad Soyad</th>
+                    <th>Telefon</th>
+                    <th>Tercih Saati</th>
+                    <th>Durum</th>
+                    <th>Tarih</th>
+                    <th>İşlem</th>
+                  </tr>
+                </thead>
+                <tbody id="callMeRequestsTableBody">
+                  <tr><td colspan="7" class="table-empty">Yükleniyor...</td></tr>
                 </tbody>
               </table>
             </div>

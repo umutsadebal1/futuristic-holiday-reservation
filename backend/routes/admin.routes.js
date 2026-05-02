@@ -1011,6 +1011,55 @@ function registerAdminRoutes(app, deps) {
       handleApiError(res, error);
     }
   });
+
+  // ── Geri Arama Talepleri ────────────────────────────────────────────────────
+  app.get('/api/admin/call-me-requests', async (_req, res) => {
+    try {
+      const result = await pool.query(`SELECT * FROM call_me_requests ORDER BY created_at DESC LIMIT 500`);
+      res.json({
+        callMeRequests: result.rows.map((r) => ({
+          id: r.id,
+          name: r.name,
+          phone: r.phone,
+          preferredHour: r.preferred_hour,
+          status: r.status,
+          createdAt: r.created_at ? new Date(r.created_at).toISOString() : ''
+        }))
+      });
+    } catch (error) {
+      handleApiError(res, error);
+    }
+  });
+
+  app.put('/api/admin/call-me-requests/:id/status', async (req, res) => {
+    try {
+      const id = toPositiveInteger(req.params.id);
+      if (!id) { res.status(400).json({ message: 'Geçerli bir ID girin.' }); return; }
+
+      const newStatus = String(req.body?.status || 'read').trim().toLowerCase();
+      const result = await pool.query(
+        `UPDATE call_me_requests SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING id`,
+        [newStatus, id]
+      );
+      if (!result.rows.length) { res.status(404).json({ message: 'Talep bulunamadı.' }); return; }
+      res.json({ message: 'Durum güncellendi.' });
+    } catch (error) {
+      handleApiError(res, error);
+    }
+  });
+
+  app.delete('/api/admin/call-me-requests/:id', async (req, res) => {
+    try {
+      const id = toPositiveInteger(req.params.id);
+      if (!id) { res.status(400).json({ message: 'Geçerli bir ID girin.' }); return; }
+
+      const result = await pool.query(`DELETE FROM call_me_requests WHERE id = $1 RETURNING id`, [id]);
+      if (!result.rows.length) { res.status(404).json({ message: 'Talep bulunamadı.' }); return; }
+      res.json({ message: 'Talep silindi.' });
+    } catch (error) {
+      handleApiError(res, error);
+    }
+  });
 }
 
 module.exports = registerAdminRoutes;
