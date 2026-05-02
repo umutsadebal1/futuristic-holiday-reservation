@@ -19,6 +19,17 @@ body {
   text-size-adjust: 100%;
 }
 
+/* iOS Safari: prevent any overflowing element from expanding the visual viewport */
+html {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Modal must sit above hotel-portal-panel (z-index: 1200) so it can't be covered */
+.modal {
+  z-index: 1300 !important;
+}
+
 /* Filter toggle — desktop'ta gizli */
 .filter-toggle-btn {
   display: none;
@@ -240,11 +251,15 @@ button,
     padding: 0.45rem 0.8rem !important;
   }
 
-  /* Hero */
+  /* Hero — contain slider overflow so slides don't bleed past container */
   .hero,
   .hero-slider-container,
   .slider-item {
     min-height: 360px !important;
+  }
+  .hero-slider-container {
+    max-width: 100vw !important;
+    overflow: hidden !important;
   }
   .slider-content {
     padding: 0 1.2rem !important;
@@ -267,11 +282,19 @@ button,
   .search-container,
   .product-search-shell {
     margin-top: -2.4rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    box-sizing: border-box !important;
   }
   .search-box,
   .ets-like-search-box {
     padding: 0.9rem !important;
     border-radius: 18px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
   .search-tabs {
     overflow-x: auto;
