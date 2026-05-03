@@ -279,7 +279,7 @@ const USER_ROLES = {
   ALT_YETKILI: 'alt_yetkili',
   KULLANICI: 'kullanici'
 };
-const SIDEBAR_PERMISSION_KEYS = ['dashboardPanel', 'citiesPanel', 'hotelsPanel', 'apisPanel', 'usersPanel'];
+const SIDEBAR_PERMISSION_KEYS = ['dashboardPanel', 'citiesPanel', 'hotelsPanel', 'apisPanel', 'usersPanel', 'reservationsPanel', 'contactPanel', 'callMePanel'];
 
 function normalizeText(value) {
   return String(value || '')
@@ -505,7 +505,7 @@ function getDefaultSidebarPermissionsForRole(role) {
   }
 
   if (safeRole === USER_ROLES.UST_YETKILI) {
-    return ['dashboardPanel', 'citiesPanel', 'hotelsPanel', 'usersPanel'];
+    return ['dashboardPanel', 'citiesPanel', 'hotelsPanel', 'usersPanel', 'reservationsPanel', 'contactPanel', 'callMePanel'];
   }
 
   return ['dashboardPanel'];

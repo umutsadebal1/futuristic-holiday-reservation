@@ -541,18 +541,20 @@ async function syncAdminMenuEntry() {
   if (!session || (!session.userId && !session.email)) return;
 
   const profile = await fetchCurrentUserProfile();
-  if (!profile) return;
 
-  const role = String(profile.role || '').trim().toLowerCase();
-  session = {
-    userId: profile.id || session.userId,
-    email: profile.email || session.email,
-    name: profile.name || session.name,
-    loggedInAt: session.loggedInAt || new Date().toISOString()
-  };
-  localStorage.setItem('authSession', JSON.stringify(session));
-
+  // Token süresi dolmuşsa localStorage'daki role bilgisini fallback olarak kullan
+  const role = String(profile?.role || getStoredUser()?.role || '').trim().toLowerCase();
   if (!isAdminRole(role)) return;
+
+  if (profile) {
+    session = {
+      userId: profile.id || session.userId,
+      email: profile.email || session.email,
+      name: profile.name || session.name,
+      loggedInAt: session.loggedInAt || new Date().toISOString()
+    };
+    localStorage.setItem('authSession', JSON.stringify(session));
+  }
 
   const separator = menu.querySelector('.user-dropdown-separator');
   const html = '<a href="/admin" id="openAdminLoginMenuBtn" class="user-dropdown-item user-dropdown-admin" data-menu-action="admin"><span class="user-dropdown-icon" aria-hidden="true">'

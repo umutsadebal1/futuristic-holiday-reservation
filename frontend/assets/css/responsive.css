@@ -410,6 +410,7 @@ button,
     padding: 1.1rem !important;
     border-radius: 16px !important;
     overflow-y: auto;
+    overflow-x: hidden;
   }
   .booking-stepper {
     flex-wrap: wrap;
@@ -429,9 +430,11 @@ button,
   .installment-table-wrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    max-width: 100%;
   }
   .installment-table {
-    min-width: 480px;
+    width: 100%;
+    min-width: 0;
   }
 
   /* Forms */
