@@ -797,7 +797,7 @@ function getNightCount(checkInValue, checkOutValue) {
 }
 
 // Rezervasyon modalını aç ve form alanlarını temizle
-function openBooking(hotelName, price) {
+function openBooking(hotelName, price, hotelId) {
   const session = getAuthSession();
   if (!session || !session.email) {
     alert('Rezervasyon için önce giriş yapmalısınız.');
@@ -808,21 +808,21 @@ function openBooking(hotelName, price) {
     // Seçilen paket fiyatını kaydet
     selectedPackagePrice = price;
     const resortNameField = document.getElementById('resortName');
-    
+
     if (resortNameField) {
-        // Form alanlarını doldur/temizle
-        resortNameField.value = hotelName; // Otel adını yazı alanına koy
-        document.getElementById('bookingCheckIn').value = ''; // Giriş tarihi temizle
-        document.getElementById('bookingCheckOut').value = ''; // Çıkış tarihi temizle
-        document.getElementById('bookingGuests').value = '1'; // Varsayılan konuk sayısı
-        document.getElementById('roomType').value = ''; // Oda türü temizle
-        document.getElementById('guestName').value = ''; // Konuk adı temizle
-        document.getElementById('guestEmail').value = ''; // E-posta temizle
-        document.getElementById('guestPhone').value = ''; // Telefon temizle
-        document.getElementById('specialRequests').value = ''; // Özel istekler temizle
-        updateTotalPrice(); // Toplam fiyatı güncelle
-        
-        // Rezervasyon modalını göster
+        resortNameField.value = hotelName;
+        const hotelIdField = document.getElementById('bookingHotelId');
+        if (hotelIdField) hotelIdField.value = String(hotelId || '');
+        document.getElementById('bookingCheckIn').value = '';
+        document.getElementById('bookingCheckOut').value = '';
+        document.getElementById('bookingGuests').value = '1';
+        document.getElementById('roomType').value = '';
+        document.getElementById('guestName').value = '';
+        document.getElementById('guestEmail').value = '';
+        document.getElementById('guestPhone').value = '';
+        document.getElementById('specialRequests').value = '';
+        updateTotalPrice();
+
         const bookingModal = document.getElementById('bookingModal');
         if (bookingModal) bookingModal.style.display = 'block';
     }
@@ -1218,41 +1218,65 @@ function updateTotalPrice() {
     }
 }
 
-// Rezervasyon formunu gönder ve localStorage'a kaydet
-function submitReservation(event) {
-    event.preventDefault(); // Form gönderiminin sayfayı yenilemesini engelle
-    
-    // Form alanlarından değer çekmek için yardımcı fonksiyonlar
-    const getElementValue = (id) => document.getElementById(id)?.value || '';
-    const getElementText = (id) => document.getElementById(id)?.textContent || '';
-    
-    // Rezervasyon objesi oluştur (tüm bilgileri sakla)
-    const reservation = {
-        id: Date.now(), // Benzersiz ID (şu anki zaman damgası)
-        resortName: getElementValue('resortName'), // Otel adı
-        guestName: getElementValue('guestName'), // Konuk adı
-        guestEmail: getElementValue('guestEmail'), // Konuk e-postası
-        guestPhone: getElementValue('guestPhone'), // Konuk telefonu
-        checkIn: getElementValue('bookingCheckIn'), // Giriş tarihi
-        checkOut: getElementValue('bookingCheckOut'), // Çıkış tarihi
-        guests: getElementValue('bookingGuests'), // Konuk sayısı
-        roomType: getElementValue('roomType'), // Oda türü
-        specialRequests: getElementValue('specialRequests'), // Özel istekler
-        totalPrice: getElementText('totalPrice'), // Toplam fiyat
-        status: 'Onaylandı', // Varsayılan durum
-        bookingDate: new Date().toLocaleDateString('tr-TR') // Rezervasyon tarihi
+// Rezervasyon formunu gönder — localStorage + backend
+async function submitReservation(event) {
+    event.preventDefault();
+
+    const getVal = (id) => document.getElementById(id)?.value || '';
+    const getNum = (id) => Number(document.getElementById(id)?.value || 0);
+
+    const hotelId = Number(getVal('bookingHotelId')) || 0;
+    const checkIn = getVal('bookingCheckIn');
+    const checkOut = getVal('bookingCheckOut');
+    const guestCount = getNum('bookingGuests') || 1;
+    const resortName = getVal('resortName');
+    const guestName = getVal('guestName');
+    const guestEmail = getVal('guestEmail');
+    const guestPhone = getVal('guestPhone');
+    const roomType = getVal('roomType');
+    const specialRequests = getVal('specialRequests');
+    const totalPriceText = document.getElementById('totalPrice')?.textContent || '0';
+    const totalAmount = Number(totalPriceText.replace(/[^\d]/g, '')) || 0;
+
+    // localStorage'a kaydet (anlık görünüm için)
+    const localId = Date.now();
+    const localEntry = {
+        id: localId,
+        resortName,
+        guestName,
+        guestEmail,
+        guestPhone,
+        checkIn,
+        checkOut,
+        guests: guestCount,
+        roomType,
+        specialRequests,
+        totalPrice: totalPriceText,
+        status: 'Onaylandı',
+        bookingDate: new Date().toLocaleDateString('tr-TR')
     };
-    
-    // localStorage'dan mevcut rezervasyonları al
-    let reservations = JSON.parse(localStorage.getItem('reservations')) || [];
-    reservations.push(reservation); // Yeni rezervasyonu ekle
-    localStorage.setItem('reservations', JSON.stringify(reservations)); // Tümünü kaydet
-    
-    // Başarılı mesajını göster ve ID'yi kopyala
-    alert(`Başarılı! Rezervasyon numaranız: ${reservation.id}`);
-    closeModal(); // Modalı kapat
-    
-    // Form alanlarını temizle
+    let reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
+    reservations.push(localEntry);
+    localStorage.setItem('reservations', JSON.stringify(reservations));
+
+    // Backend'e gönder (admin panelinde görünsün)
+    if (hotelId) {
+        try {
+            await requestAuthApi('/api/reservations/quick', {
+                hotelId,
+                checkIn,
+                checkOut,
+                guestCount,
+                totalAmount,
+                notes: [guestName, guestEmail, guestPhone, roomType, specialRequests].filter(Boolean).join(' | ')
+            });
+        } catch (_err) {
+            // Backend hatası oluşsa da rezervasyon localStorage'da kaydedildi
+        }
+    }
+
+    alert('Rezervasyon numaranız: ' + localId);
+    closeModal();
     const bookingForm = document.getElementById('bookingForm');
     if (bookingForm) bookingForm.reset();
 }
@@ -2546,140 +2570,6 @@ function getHotelsByPage() {
   return [];
 }
 
-function ensureHotelPortalPanel() {
-  let panel = document.getElementById('hotelPortalPanel');
-  if (panel) return panel;
-
-  panel = document.createElement('aside');
-  panel.id = 'hotelPortalPanel';
-  panel.className = 'hotel-portal-panel';
-  panel.innerHTML = ''
-    + '<div class="hotel-portal-ring" aria-hidden="true"></div>'
-    + '<div class="hotel-portal-core" aria-hidden="true"></div>'
-    + '<div class="hotel-portal-content">'
-    + '  <p class="hotel-portal-kicker">Portal View</p>'
-    + '  <h3 id="hotelPortalTitle">Otel Keşfi</h3>'
-    + '  <p id="hotelPortalMeta" class="hotel-portal-meta">Kartin uzerine gelerek onizleme ac.</p>'
-    + '  <div id="hotelPortalGallery" class="hotel-portal-gallery"></div>'
-    + '</div>';
-
-  document.body.appendChild(panel);
-
-  panel.addEventListener('mouseenter', () => {
-    panel.classList.add('is-hovered');
-  });
-
-  panel.addEventListener('mouseleave', () => {
-    panel.classList.remove('is-hovered');
-    panel.classList.remove('show');
-  });
-
-  return panel;
-}
-
-function buildHotelPortalGallery(hotel, list) {
-  const source = Array.isArray(list) ? list : [];
-  const leadImage = String(hotel?.image || '').trim();
-  const others = source
-    .filter((item) => String(item?.name || '') !== String(hotel?.name || ''))
-    .slice(0, 6)
-    .map((item) => ({
-      name: item?.name || 'Otel',
-      image: String(item?.image || '').trim() || 'img/logo.png'
-    }));
-
-  const images = [];
-  if (leadImage) {
-    images.push({
-      name: hotel?.name || 'Seçili Otel',
-      image: leadImage
-    });
-  }
-
-  return images.concat(others).slice(0, 6);
-}
-
-function bindHotelPortalInteractions(list) {
-  const grid = document.getElementById('hotelsGrid');
-  if (!grid) return;
-
-  const cards = grid.querySelectorAll('.js-hotel-card');
-  if (!cards.length) return;
-
-  const panel = ensureHotelPortalPanel();
-  const titleEl = document.getElementById('hotelPortalTitle');
-  const metaEl = document.getElementById('hotelPortalMeta');
-  const galleryEl = document.getElementById('hotelPortalGallery');
-
-  let closeTimer = 0;
-
-  const scheduleClose = () => {
-    if (closeTimer) window.clearTimeout(closeTimer);
-    closeTimer = window.setTimeout(() => {
-      if (!panel.classList.contains('is-hovered')) {
-        panel.classList.remove('show');
-      }
-      closeTimer = 0;
-    }, 140);
-  };
-
-  const openForCard = (card) => {
-    if (closeTimer) {
-      window.clearTimeout(closeTimer);
-      closeTimer = 0;
-    }
-
-    const raw = card.getAttribute('data-hotel-json') || '';
-    if (!raw) return;
-
-    let hotel = null;
-    try {
-      hotel = JSON.parse(decodeURIComponent(raw));
-    } catch (_error) {
-      hotel = null;
-    }
-    if (!hotel) return;
-
-    const gallery = buildHotelPortalGallery(hotel, list);
-
-    if (titleEl) titleEl.textContent = hotel.name || 'Otel Keşfi';
-    if (metaEl) {
-      metaEl.textContent = 'Puan: ' + (Number(hotel.rating) || 0).toFixed(1) + ' - Fiyat: ₺' + (Number(hotel.price) || 0) + ' - Portal galeri açık';
-    }
-
-    if (galleryEl) {
-      galleryEl.innerHTML = gallery.map((item, index) => {
-        return ''
-          + '<figure class="hotel-portal-thumb ' + (index === 0 ? 'lead' : '') + '">'
-          + '  <img src="' + item.image + '" alt="' + escapeUiHtml(item.name) + '">'
-          + '  <figcaption>' + escapeUiHtml(item.name) + '</figcaption>'
-          + '</figure>';
-      }).join('');
-
-      galleryEl.querySelectorAll('img').forEach((img) => {
-        img.addEventListener('error', () => {
-          img.src = 'img/logo.png';
-        }, { once: true });
-      });
-    }
-
-    panel.classList.add('show');
-  };
-
-  cards.forEach((card) => {
-    card.addEventListener('mouseenter', () => {
-      openForCard(card);
-    });
-
-    card.addEventListener('mouseleave', () => {
-      scheduleClose();
-    });
-  });
-
-  grid.addEventListener('mouseleave', () => {
-    scheduleClose();
-  });
-}
 
 // Otel listesini HTML kartlarına dönüştürüp sayfaya render et
 function renderHotels(list) {
@@ -2753,7 +2643,7 @@ function renderHotels(list) {
       + "      <button class='btn-secondary js-wishlist-btn' type='button'>❤</button>"
       + "      <button class='btn-secondary js-compare-btn' type='button'>Karşılaştır</button>"
       + "    </div>"
-      + "    <button class='btn-book js-book-btn' data-hotel-name='" + encodedHotelName + "' data-hotel-price='" + shownPrice + "'>Rezervasyon Yap</button>"
+      + "    <button class='btn-book js-book-btn' data-hotel-id='" + hotel.id + "' data-hotel-name='" + encodedHotelName + "' data-hotel-price='" + shownPrice + "'>Rezervasyon Yap</button>"
       + "  </div>"
       + "</div>";
   }).join("");
@@ -2764,7 +2654,8 @@ function renderHotels(list) {
       const nameEncoded = btn.getAttribute('data-hotel-name') || '';
       const hotelName = decodeURIComponent(nameEncoded);
       const hotelPrice = Number(btn.getAttribute('data-hotel-price') || 0);
-      openBooking(hotelName, hotelPrice);
+      const hotelId = Number(btn.getAttribute('data-hotel-id') || 0);
+      openBooking(hotelName, hotelPrice, hotelId);
     });
   });
 
@@ -2774,8 +2665,6 @@ function renderHotels(list) {
       img.src = 'img/logo.png';
     }, { once: true });
   });
-
-  bindHotelPortalInteractions(list);
 
   document.dispatchEvent(new CustomEvent('hotels:rendered', { detail: { hotels: list } }));
 }

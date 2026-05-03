@@ -77,6 +77,47 @@ function registerPublicRoutes(app, deps) {
     }
   });
 
+  // Basit rezervasyon — envanter yönetimi olmadan, form verisiyle direkt kayıt
+  app.post('/api/reservations/quick', requireAuth, async (req, res) => {
+    try {
+      const userId = toPositiveInteger(req.auth?.userId);
+      const hotelId = toPositiveInteger(req.body?.hotelId);
+      const checkIn = String(req.body?.checkIn || '').trim();
+      const checkOut = String(req.body?.checkOut || '').trim();
+      const guestCount = Math.max(1, Number(req.body?.guestCount) || 1);
+      const totalAmount = Math.max(0, Number(req.body?.totalAmount) || 0);
+
+      if (!userId) {
+        res.status(401).json({ message: 'Giriş yapmanız gerekiyor.' });
+        return;
+      }
+      if (!hotelId || !checkIn || !checkOut) {
+        res.status(400).json({ message: 'hotelId, checkIn ve checkOut zorunludur.' });
+        return;
+      }
+
+      const nights = Math.max(1, Math.ceil(
+        (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000
+      ));
+
+      const result = await pool.query(
+        `INSERT INTO reservations
+           (user_id, hotel_id, check_in, check_out, guest_count, nights,
+            base_amount, discount_amount, total_amount, status, updated_at)
+         VALUES ($1, $2, $3::date, $4::date, $5, $6, $7, 0, $7, 'confirmed', NOW())
+         RETURNING *`,
+        [userId, hotelId, checkIn, checkOut, guestCount, nights, totalAmount]
+      );
+
+      res.status(201).json({
+        message: 'Rezervasyon oluşturuldu.',
+        reservation: mapReservationRow(result.rows[0])
+      });
+    } catch (error) {
+      handleApiError(res, error);
+    }
+  });
+
   app.get('/api/reservations', requireAuth, async (req, res) => {
     try {
       const isAdmin = [USER_ROLES.PATRON, USER_ROLES.UST_YETKILI].includes(normalizeUserRole(req.auth?.role));

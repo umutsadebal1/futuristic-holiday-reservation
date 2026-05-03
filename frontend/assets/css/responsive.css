@@ -295,6 +295,17 @@ button,
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+  }
+  /* search-panels ve smart-search-wrap yan yana görünmesin */
+  .search-panels,
+  .search-box .smart-search-wrap {
+    width: 100% !important;
+    flex: none !important;
+    min-width: 0 !important;
   }
   .search-tabs {
     overflow-x: auto;
