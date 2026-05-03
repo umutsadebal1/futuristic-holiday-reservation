@@ -840,6 +840,16 @@
     color: var(--dark-accent);
 }
 
+.booking-stepper li.done {
+    border-color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+}
+
+.hidden {
+    display: none !important;
+}
+
 .booking-step-panel {
     display: none;
 }

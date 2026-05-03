@@ -823,6 +823,22 @@ function openBooking(hotelName, price, hotelId) {
         document.getElementById('specialRequests').value = '';
         updateTotalPrice();
 
+        // Wizard'ı step 0'a sıfırla
+        const form = document.getElementById('bookingForm');
+        if (form) {
+          form.querySelectorAll('.booking-step-panel').forEach((p, i) => p.classList.toggle('active', i === 0));
+          document.querySelectorAll('#bookingStepper li').forEach((li, i) => {
+            li.classList.toggle('active', i === 0);
+            li.classList.remove('done');
+          });
+          const prevBtn2 = document.getElementById('bookingPrevStepBtn');
+          const nextBtn2 = document.getElementById('bookingNextStepBtn');
+          const submitBtn2 = document.getElementById('bookingSubmitBtn');
+          if (prevBtn2) prevBtn2.disabled = true;
+          if (nextBtn2) nextBtn2.classList.remove('hidden');
+          if (submitBtn2) submitBtn2.classList.add('hidden');
+        }
+
         const bookingModal = document.getElementById('bookingModal');
         if (bookingModal) bookingModal.style.display = 'block';
     }
@@ -1216,6 +1232,49 @@ function updateTotalPrice() {
         totalPriceEl.textContent = formatTRY(total);
         }
     }
+}
+
+// Rezervasyon wizard adım navigasyonunu ve form submit'i bağlar
+function initBookingWizard() {
+  const form = document.getElementById('bookingForm');
+  const prevBtn = document.getElementById('bookingPrevStepBtn');
+  const nextBtn = document.getElementById('bookingNextStepBtn');
+  const submitBtn = document.getElementById('bookingSubmitBtn');
+  const stepperItems = document.querySelectorAll('#bookingStepper li');
+
+  if (!form) return;
+
+  let currentStep = 0;
+  const panels = Array.from(form.querySelectorAll('.booking-step-panel'));
+  const totalSteps = panels.length;
+
+  function goToStep(step) {
+    if (step < 0 || step >= totalSteps) return;
+    panels.forEach((p, i) => p.classList.toggle('active', i === step));
+    stepperItems.forEach((li, i) => {
+      li.classList.toggle('active', i === step);
+      li.classList.toggle('done', i < step);
+    });
+    if (prevBtn) prevBtn.disabled = step === 0;
+    if (nextBtn) nextBtn.classList.toggle('hidden', step === totalSteps - 1);
+    if (submitBtn) submitBtn.classList.toggle('hidden', step !== totalSteps - 1);
+    currentStep = step;
+  }
+
+  if (nextBtn && !nextBtn.dataset.bound) {
+    nextBtn.dataset.bound = 'true';
+    nextBtn.addEventListener('click', () => goToStep(currentStep + 1));
+  }
+  if (prevBtn && !prevBtn.dataset.bound) {
+    prevBtn.dataset.bound = 'true';
+    prevBtn.addEventListener('click', () => goToStep(currentStep - 1));
+  }
+  if (form && !form.dataset.bound) {
+    form.dataset.bound = 'true';
+    form.addEventListener('submit', submitReservation);
+  }
+
+  goToStep(0);
 }
 
 // Rezervasyon formunu gönder — localStorage + backend
@@ -3134,8 +3193,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const inputs = ["bookingCheckIn", "bookingCheckOut", "roomType"];
   inputs.forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener("change", updateTotalPrice); // Fiyatı güncelle
+    if (el) el.addEventListener("change", updateTotalPrice);
   });
+
+  // Rezervasyon wizard'ı başlat
+  initBookingWizard();
 
   // Reservasyonları yükle ve göster
   syncReservationFilterFromUrl();
