@@ -860,6 +860,7 @@ function openLoginModal() {
   closeUserMenu();
   closeSignupModal();
   loginModal.style.display = 'block';
+  renderGoogleButtons();
   const emailInput = document.getElementById('loginEmail');
   if (emailInput) emailInput.focus();
 }
@@ -878,6 +879,7 @@ function openSignupModal() {
   closeUserMenu();
   closeLoginModal();
   signupModal.style.display = 'block';
+  renderGoogleButtons();
   const nameInput = document.getElementById('signupName');
   if (nameInput) nameInput.focus();
 }
@@ -2528,15 +2530,22 @@ function initGoogleSignIn(clientId) {
     auto_select: false
   });
 
+  renderGoogleButtons();
+}
+
+function renderGoogleButtons() {
+  if (!window.google || !window.google.accounts || !window.google.accounts.id) return;
+
   const containers = ['googleSignInLoginBtn', 'googleSignInSignupBtn'];
   containers.forEach(function (id) {
     const el = document.getElementById(id);
     if (!el) return;
+    el.innerHTML = '';
     window.google.accounts.id.renderButton(el, {
       type: 'standard',
       theme: 'outline',
       size: 'large',
-      width: Math.min(el.offsetWidth || 300, 400),
+      width: 300,
       locale: 'tr'
     });
   });

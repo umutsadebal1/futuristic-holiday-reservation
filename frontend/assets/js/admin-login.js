@@ -32,12 +32,11 @@ function buildApiUrl(pathname) {
   return normalizedPath;
 }
 
-async function requestPost(pathname, payload, headers) {
+async function requestPost(pathname, payload) {
   const response = await fetch(buildApiUrl(pathname), {
     method: 'POST',
-    headers: Object.assign({
-      'Content-Type': 'application/json'
-    }, headers || {}),
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload || {})
   });
 
@@ -51,12 +50,11 @@ async function requestPost(pathname, payload, headers) {
   return data;
 }
 
-async function requestGet(pathname, headers) {
+async function requestGet(pathname) {
   const response = await fetch(buildApiUrl(pathname), {
     method: 'GET',
-    headers: Object.assign({
-      'Content-Type': 'application/json'
-    }, headers || {})
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' }
   });
 
   const data = await response.json().catch(() => ({}));
@@ -86,34 +84,15 @@ function setLoading(loading) {
   submitBtn.textContent = loading ? 'Doğrulanıyor...' : 'Doğrula ve Panele Gir';
 }
 
-function saveSession(user, tokens) {
-  localStorage.setItem(AUTH_TOKENS_STORAGE_KEY, JSON.stringify({
-    accessToken: tokens?.accessToken || '',
-    refreshToken: tokens?.refreshToken || '',
-    tokenType: tokens?.tokenType || 'Bearer',
-    expiresIn: tokens?.expiresIn || '',
-    loggedInAt: new Date().toISOString()
-  }));
-
+function saveSession(user) {
+  localStorage.removeItem(AUTH_TOKENS_STORAGE_KEY);
   localStorage.setItem('authSession', JSON.stringify({
     userId: user.id,
     email: user.email,
     name: user.name,
-    token: tokens?.accessToken || '',
-    refreshToken: tokens?.refreshToken || '',
     loggedInAt: new Date().toISOString()
   }));
-
-  const currentUser = localStorage.getItem('user');
-  let parsedUser = {};
-  try {
-    parsedUser = currentUser ? JSON.parse(currentUser) : {};
-  } catch (_error) {
-    parsedUser = {};
-  }
-
   localStorage.setItem('user', JSON.stringify({
-    ...parsedUser,
     id: user.id,
     userId: user.id,
     name: user.name,
@@ -324,32 +303,15 @@ async function verifyAdminAccess(email, password) {
     throw new Error('Giriş yanıtı alınamadı.');
   }
 
-  const accessToken = String(loginPayload?.tokens?.accessToken || '').trim();
-  if (!accessToken) {
-    throw new Error('Token oluşturulamadı.');
-  }
-
-  const profilePayload = await requestGet('/api/auth/me', {
-    Authorization: 'Bearer ' + accessToken
-  });
-  const profileUser = profilePayload?.user;
-
-  if (!profileUser || !isAdminRole(profileUser.role)) {
-    try {
-      await requestPost('/api/auth/logout', {}, {
-        Authorization: 'Bearer ' + accessToken
-      });
-    } catch (_error) {
-      // Best effort logout for non-admin users.
-    }
-
+  if (!isAdminRole(loginUser.role)) {
+    try { await requestPost('/api/auth/logout', {}); } catch (_e) { /* ignore */ }
     localStorage.removeItem('authSession');
     localStorage.removeItem(AUTH_TOKENS_STORAGE_KEY);
     throw new Error('Bu hesap admin paneli için yetkili değil.');
   }
 
-  saveSession(profileUser, loginPayload?.tokens || null);
-  return profileUser;
+  saveSession(loginUser);
+  return loginUser;
 }
 
 function getDeniedMessage() {
