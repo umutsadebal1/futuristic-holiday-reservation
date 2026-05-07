@@ -13,6 +13,8 @@ function registerPublicRoutes(app, deps) {
     getCitiesWithCounts,
     getHotels,
     slugify,
+    RECAPTCHA_SITE_KEY,
+    GOOGLE_CLIENT_ID,
     handleApiError
   } = deps;
 
@@ -212,7 +214,12 @@ function registerPublicRoutes(app, deps) {
   app.get('/api/bootstrap', async (_req, res) => {
     try {
       const [cities, hotels] = await Promise.all([getCitiesWithCounts(), getHotels()]);
-      res.json({ cities, hotels });
+      res.json({
+        cities,
+        hotels,
+        recaptchaSiteKey: RECAPTCHA_SITE_KEY || '',
+        googleClientId: GOOGLE_CLIENT_ID || ''
+      });
     } catch (error) {
       handleApiError(res, error);
     }

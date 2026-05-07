@@ -958,7 +958,8 @@ async function handleLoginSubmit(event) {
   };
 
   try {
-    const payload = await requestAuthApi('/api/auth/login', { email, password });
+    const recaptchaToken = await getRecaptchaToken('login');
+    const payload = await requestAuthApi('/api/auth/login', { email, password, recaptchaToken });
     if (!payload?.user) {
       throw new Error('Giris yaniti alinmadi.');
     }
@@ -1020,7 +1021,8 @@ async function handleSignupSubmit(event) {
   };
 
   try {
-    const payload = await requestAuthApi('/api/auth/register', { name, email, password });
+    const recaptchaToken = await getRecaptchaToken('register');
+    const payload = await requestAuthApi('/api/auth/register', { name, email, password, recaptchaToken });
     if (!payload?.user) {
       throw new Error('Kayit yaniti alinmadi.');
     }
@@ -2496,6 +2498,93 @@ function applyCatalogPayload(payload) {
   return true;
 }
 
+let _recaptchaSiteKey = '';
+let _googleClientId   = '';
+
+function loadRecaptchaScript(siteKey) {
+  if (!siteKey || document.querySelector('script[src*="recaptcha"]')) return;
+  const s = document.createElement('script');
+  s.src = 'https://www.google.com/recaptcha/api.js?render=' + encodeURIComponent(siteKey);
+  s.async = true;
+  document.head.appendChild(s);
+}
+
+function loadGoogleIdentityScript(clientId) {
+  if (!clientId || document.querySelector('script[src*="accounts.google.com/gsi/client"]')) return;
+  const s = document.createElement('script');
+  s.src = 'https://accounts.google.com/gsi/client';
+  s.async = true;
+  s.defer = true;
+  s.onload = function () { initGoogleSignIn(clientId); };
+  document.head.appendChild(s);
+}
+
+function initGoogleSignIn(clientId) {
+  if (!window.google || !window.google.accounts || !window.google.accounts.id) return;
+
+  window.google.accounts.id.initialize({
+    client_id: clientId,
+    callback: handleGoogleCredential,
+    auto_select: false
+  });
+
+  const containers = ['googleSignInLoginBtn', 'googleSignInSignupBtn'];
+  containers.forEach(function (id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    window.google.accounts.id.renderButton(el, {
+      type: 'standard',
+      theme: 'outline',
+      size: 'large',
+      width: Math.min(el.offsetWidth || 300, 400),
+      locale: 'tr'
+    });
+  });
+}
+
+async function handleGoogleCredential(response) {
+  const credential = response && response.credential;
+  if (!credential) return;
+
+  try {
+    const payload = await requestAuthApi('/api/auth/google', { credential });
+    if (!payload || !payload.user) throw new Error('Google giriş yanıtı alınamadı.');
+
+    const user = payload.user;
+    const storedUser = getStoredUser();
+    localStorage.setItem('user', JSON.stringify({
+      id: user.id,
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      registeredAt: user.registeredAt || (storedUser && storedUser.registeredAt) || new Date().toISOString()
+    }));
+    localStorage.setItem('authSession', JSON.stringify({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      loggedInAt: new Date().toISOString()
+    }));
+    localStorage.removeItem('authTokens');
+
+    closeLoginModal();
+    closeSignupModal();
+    initAuthButtons();
+    alert('Google ile giriş başarılı.');
+  } catch (error) {
+    alert((error && error.message) || 'Google ile giriş başarısız.');
+  }
+}
+
+async function getRecaptchaToken(action) {
+  if (!_recaptchaSiteKey || !window.grecaptcha || !window.grecaptcha.execute) return '';
+  try {
+    return await window.grecaptcha.execute(_recaptchaSiteKey, { action: action || 'submit' });
+  } catch (_e) {
+    return '';
+  }
+}
+
 async function syncCatalogFromApi() {
   try {
     const response = await fetch(buildApiUrl('/api/bootstrap'));
@@ -2504,6 +2593,16 @@ async function syncCatalogFromApi() {
     }
 
     const payload = await response.json();
+
+    if (payload.recaptchaSiteKey && !_recaptchaSiteKey) {
+      _recaptchaSiteKey = payload.recaptchaSiteKey;
+      loadRecaptchaScript(_recaptchaSiteKey);
+    }
+    if (payload.googleClientId && !_googleClientId) {
+      _googleClientId = payload.googleClientId;
+      loadGoogleIdentityScript(_googleClientId);
+    }
+
     const applied = applyCatalogPayload(payload);
     if (applied) lastCatalogSyncAt = Date.now();
     return applied;

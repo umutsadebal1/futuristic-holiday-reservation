@@ -3,6 +3,8 @@ function registerAuthRoutes(app, deps) {
     authLimiter,
     registerUser,
     loginUser,
+    googleAuthUser,
+    verifyGoogleIdToken,
     getUserById,
     issueAuthTokens,
     requireAuth,
@@ -104,6 +106,38 @@ function registerAuthRoutes(app, deps) {
       clearAuthCookies(res);
       const user = await getUserById(target.id);
       res.json({ message: 'Cikis yapildi.', user: user ? mapUserRow(user) : null });
+    } catch (error) {
+      handleApiError(res, error);
+    }
+  });
+
+  app.post('/api/auth/google', authLimiter, async (req, res) => {
+    try {
+      const credential = String(req.body?.credential || '').trim();
+      if (!credential) {
+        res.status(400).json({ message: 'Google kimlik belgesi zorunludur.' });
+        return;
+      }
+
+      const googlePayload = await verifyGoogleIdToken(credential);
+      const googleId = String(googlePayload.sub || '').trim();
+      const email = String(googlePayload.email || '').trim().toLowerCase();
+      const name = String(googlePayload.name || googlePayload.email || '').trim();
+
+      if (!googleId || !email) {
+        res.status(400).json({ message: 'Google hesabından kimlik bilgisi alınamadı.' });
+        return;
+      }
+
+      const userRow = await googleAuthUser({ googleId, email, name });
+      if (!userRow) {
+        res.status(500).json({ message: 'Kullanıcı işlemi başarısız.' });
+        return;
+      }
+
+      const tokens = await issueAuthTokens(userRow);
+      setAuthCookies(res, tokens);
+      res.json({ message: 'Google ile giriş başarılı.', user: mapUserRow(userRow) });
     } catch (error) {
       handleApiError(res, error);
     }

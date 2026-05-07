@@ -1545,6 +1545,35 @@ body.dark-mode .signup-modal-footer {
     color: #bbb;
 }
 
+.modal-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0 12px;
+    color: #aaa;
+    font-size: 0.8rem;
+}
+
+.modal-divider::before,
+.modal-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #ddd;
+}
+
+body.dark-mode .modal-divider::before,
+body.dark-mode .modal-divider::after {
+    background: #444;
+}
+
+.google-signin-container {
+    margin-bottom: 12px;
+    min-height: 44px;
+    display: flex;
+    justify-content: center;
+}
+
 .login-modal-footer a {
     color: var(--dark-accent);
     font-weight: 700;

@@ -36,6 +36,7 @@ const RECAPTCHA_MIN_SCORE = Number(process.env.RECAPTCHA_MIN_SCORE) || 0.5;
 const RECAPTCHA_ENTERPRISE_PROJECT_ID = String(process.env.RECAPTCHA_ENTERPRISE_PROJECT_ID || '').trim();
 const RECAPTCHA_ENTERPRISE_API_KEY = String(process.env.RECAPTCHA_ENTERPRISE_API_KEY || '').trim();
 const RECAPTCHA_EXPECTED_ACTION = String(process.env.RECAPTCHA_EXPECTED_ACTION || 'admin_login').trim() || 'admin_login';
+const GOOGLE_CLIENT_ID = String(process.env.GOOGLE_CLIENT_ID || '').trim();
 const MAINTENANCE_MODE = String(process.env.MAINTENANCE_MODE || '').trim().toLowerCase() === 'true';
 const MAINTENANCE_MESSAGE = String(process.env.MAINTENANCE_MESSAGE || '').trim();
 const MAINTENANCE_TOKEN_TTL = String(process.env.MAINTENANCE_TOKEN_TTL || '12h').trim();
@@ -67,12 +68,15 @@ app.use(helmet({
       styleSrc:       ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc:        ["'self'", 'https://fonts.gstatic.com'],
       scriptSrc:      ["'self'", 'https://www.google.com', 'https://www.gstatic.com',
-                       'https://www.recaptcha.net', 'https://unpkg.com', 'https://cdn.jsdelivr.net'],
+                       'https://www.recaptcha.net', 'https://unpkg.com', 'https://cdn.jsdelivr.net',
+                       'https://accounts.google.com'],
       imgSrc:         ["'self'", 'data:', 'https:'],
       connectSrc:     ["'self'", 'https://www.google.com', 'https://www.recaptcha.net',
-                       'https://www.gstatic.com', 'https://recaptchaenterprise.googleapis.com'],
+                       'https://www.gstatic.com', 'https://recaptchaenterprise.googleapis.com',
+                       'https://accounts.google.com', 'https://oauth2.googleapis.com'],
       frameSrc:       ["'self'", 'https://www.google.com', 'https://maps.google.com',
-                       'https://www.recaptcha.net', 'https://www.gstatic.com'],
+                       'https://www.recaptcha.net', 'https://www.gstatic.com',
+                       'https://accounts.google.com'],
       frameAncestors: ["'none'"],
       baseUri:        ["'self'"],
       formAction:     ["'self'"],
@@ -1010,7 +1014,8 @@ async function ensureSchema() {
     'ALTER TABLE app_users ADD COLUMN IF NOT EXISTS last_active_at TIMESTAMPTZ;',
     'ALTER TABLE app_users ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT FALSE;',
     'ALTER TABLE app_users ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW();',
-    'ALTER TABLE app_users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();'
+    'ALTER TABLE app_users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();',
+    'ALTER TABLE app_users ADD COLUMN IF NOT EXISTS google_id TEXT;'
   ];
 
   for (const statement of userAlterStatements) {
@@ -2173,6 +2178,77 @@ async function loginUser(payload) {
   return userRow ? mapUserRow(userRow) : null;
 }
 
+async function verifyGoogleIdToken(credential) {
+  if (!GOOGLE_CLIENT_ID) {
+    const err = new Error('Google OAuth yapılandırılmamış.');
+    err.status = 503;
+    throw err;
+  }
+  const { OAuth2Client } = require('google-auth-library');
+  const client = new OAuth2Client(GOOGLE_CLIENT_ID);
+  const ticket = await client.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID });
+  return ticket.getPayload();
+}
+
+async function googleAuthUser({ googleId, email, name }) {
+  const safeEmail = String(email || '').trim().toLowerCase();
+  const safeName = String(name || safeEmail).trim();
+  const safeGoogleId = String(googleId || '').trim();
+
+  if (!safeGoogleId || !safeEmail) {
+    const err = new Error('Geçersiz Google kimliği.');
+    err.status = 400;
+    throw err;
+  }
+
+  const byGoogleId = await pool.query(
+    'SELECT * FROM app_users WHERE google_id = $1 LIMIT 1',
+    [safeGoogleId]
+  );
+
+  if (byGoogleId.rows.length) {
+    const user = byGoogleId.rows[0];
+    await pool.query(
+      'UPDATE app_users SET last_login_at = NOW(), last_active_at = NOW(), is_active = TRUE, updated_at = NOW() WHERE id = $1',
+      [user.id]
+    );
+    return getUserById(user.id);
+  }
+
+  const byEmail = await pool.query(
+    'SELECT * FROM app_users WHERE email = $1 LIMIT 1',
+    [safeEmail]
+  );
+
+  if (byEmail.rows.length) {
+    const user = byEmail.rows[0];
+    await pool.query(
+      'UPDATE app_users SET google_id = $1, last_login_at = NOW(), last_active_at = NOW(), is_active = TRUE, updated_at = NOW() WHERE id = $2',
+      [safeGoogleId, user.id]
+    );
+    return getUserById(user.id);
+  }
+
+  const userCountResult = await pool.query('SELECT COUNT(*)::int AS count FROM app_users');
+  const userCount = Number(userCountResult.rows[0]?.count) || 0;
+  const role = userCount === 0 ? USER_ROLES.PATRON : USER_ROLES.KULLANICI;
+  const sidebarPermissions = getDefaultSidebarPermissionsForRole(role);
+
+  const result = await pool.query(
+    `INSERT INTO app_users (name, email, password_hash, google_id, role, sidebar_permissions, registered_at, last_login_at, last_active_at, is_active, updated_at)
+     VALUES ($1, $2, '', $3, $4, $5, NOW(), NOW(), NOW(), TRUE, NOW())
+     RETURNING id`,
+    [safeName, safeEmail, safeGoogleId, role, sidebarPermissions]
+  );
+
+  if (!result.rows[0]) {
+    const err = new Error('Kullanıcı oluşturulamadı.');
+    err.status = 500;
+    throw err;
+  }
+  return getUserById(result.rows[0].id);
+}
+
 async function resolveActorUser(input) {
   const actorId = toPositiveInteger(input?.actorUserId || input?.userId || input?.id);
   const actorEmail = String(input?.actorEmail || input?.email || '').trim().toLowerCase();
@@ -2491,6 +2567,9 @@ registerRoutes(app, {
   RECAPTCHA_ENTERPRISE_PROJECT_ID,
   RECAPTCHA_ENTERPRISE_API_KEY,
   RECAPTCHA_EXPECTED_ACTION,
+  GOOGLE_CLIENT_ID,
+  verifyGoogleIdToken,
+  googleAuthUser,
   MAINTENANCE_MODE,
   MAINTENANCE_MESSAGE,
   MAINTENANCE_TOKEN_TTL,
