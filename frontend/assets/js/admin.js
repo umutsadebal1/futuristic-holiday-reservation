@@ -2047,6 +2047,9 @@
       badge.style.display = newCount ? '' : 'none';
     }
 
+    const metricEl = document.getElementById('metricCallMeNew');
+    if (metricEl) metricEl.textContent = newCount;
+
     if (!state.callMeRequests.length) {
       tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Geri arama talebi bulunamadı.</td></tr>';
       return;
