@@ -604,15 +604,14 @@
   async function requestJson(pathname, options) {
     const requestOptions = options || {};
     const headers = Object.assign({}, requestOptions.headers || {});
-    const accessToken = getAccessToken();
-    if (accessToken && !headers.Authorization) {
-      headers.Authorization = 'Bearer ' + accessToken;
-    }
     if (requestOptions.body && !headers['Content-Type']) {
       headers['Content-Type'] = 'application/json';
     }
 
-    const response = await fetch(buildApiUrl(pathname), Object.assign({}, requestOptions, { headers }));
+    const response = await fetch(buildApiUrl(pathname), Object.assign({}, requestOptions, {
+      headers,
+      credentials: 'include'
+    }));
     const responseData = await response.json().catch(() => ({}));
 
     if (!response.ok) {
@@ -630,18 +629,12 @@
   }
 
   async function uploadImage(category, file) {
-    const accessToken = getAccessToken();
     const formData = new FormData();
     formData.append('image', file);
 
-    const headers = {};
-    if (accessToken) {
-      headers.Authorization = 'Bearer ' + accessToken;
-    }
-
     const response = await fetch(buildApiUrl('/api/admin/uploads/' + category), {
       method: 'POST',
-      headers,
+      credentials: 'include',
       body: formData
     });
 

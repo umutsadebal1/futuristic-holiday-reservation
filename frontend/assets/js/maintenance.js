@@ -1,8 +1,6 @@
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'maintenanceAccessToken';
-
   const statusText  = document.getElementById('maintenanceStatusText');
   const messageText = document.getElementById('maintenanceMessage');
   const errorText   = document.getElementById('maintenanceErrorText');
@@ -19,14 +17,6 @@
   const setError   = (m) => { if (errorText)   errorText.textContent   = m || ''; };
   const setStatus  = (m) => { if (statusText)  statusText.textContent  = m || ''; };
   const setMessage = (m) => { if (messageText) messageText.textContent = m || ''; };
-
-  const getToken = () => {
-    try { return String(localStorage.getItem(STORAGE_KEY) || ''); } catch { return ''; }
-  };
-
-  const saveToken = (token) => {
-    try { localStorage.setItem(STORAGE_KEY, token); } catch { /* ignore */ }
-  };
 
   const resolveApiBaseUrl = () => {
     if (typeof window === 'undefined') return '';
@@ -144,10 +134,9 @@
         });
 
         const payload = await res.json().catch(() => ({}));
-        if (!res.ok)        throw new Error(payload?.message || 'Anahtar doğrulanamadı.');
-        if (!payload?.token) throw new Error('Erişim tokeni üretilmedi.');
+        if (!res.ok || !payload?.ok) throw new Error(payload?.message || 'Anahtar doğrulanamadı.');
 
-        saveToken(payload.token);
+        // Token sunucu tarafından HttpOnly cookie olarak set edildi — localStorage'a kaydedilmez
         window.location.href = 'index.html';
       } catch (err) {
         setError(err.message || 'Anahtar doğrulanamadı.');
@@ -159,9 +148,6 @@
   }
 
   /* ---- Init ---- */
-  const existing = getToken();
-  if (existing && continueBtn) continueBtn.classList.remove('hidden');
-
   initLoader();
   initHeroSlider();
   fetchStatus();

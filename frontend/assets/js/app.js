@@ -662,6 +662,7 @@ const initAuthButtons = () => {
 
         localStorage.removeItem('authTokens');
         localStorage.removeItem('authSession');
+        localStorage.removeItem('user');
         alert('Çıkış yapıldı!');
         closeUserMenu();
         initAuthButtons();
@@ -889,17 +890,10 @@ function closeSignupModal() {
 }
 
 async function requestAuthApi(pathname, payload) {
-  const accessToken = getAccessToken();
-  const headers = {
-    'Content-Type': 'application/json'
-  };
-  if (accessToken) {
-    headers.Authorization = 'Bearer ' + accessToken;
-  }
-
   const response = await fetch(buildApiUrl(pathname), {
     method: 'POST',
-    headers,
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload || {})
   });
 
@@ -941,27 +935,14 @@ async function handleLoginSubmit(event) {
 
   const storedUser = getStoredUser();
 
-  const applyLoginState = (user, authPayload) => {
-    const nextStoredUser = {
-      ...(storedUser || {}),
+  const applyLoginState = (user) => {
+    // Yalnızca UI için veri — token veya şifre saklanmaz
+    localStorage.setItem('user', JSON.stringify({
       id: user.id,
       userId: user.id,
       name: user.name,
       email: user.email,
       registeredAt: user.registeredAt || storedUser?.registeredAt || new Date().toISOString()
-    };
-
-    if (storedUser?.password) {
-      nextStoredUser.password = storedUser.password;
-    }
-
-    localStorage.setItem('user', JSON.stringify(nextStoredUser));
-    localStorage.setItem('authTokens', JSON.stringify({
-      accessToken: authPayload?.tokens?.accessToken || '',
-      refreshToken: authPayload?.tokens?.refreshToken || '',
-      tokenType: authPayload?.tokens?.tokenType || 'Bearer',
-      expiresIn: authPayload?.tokens?.expiresIn || '',
-      loggedInAt: new Date().toISOString()
     }));
     localStorage.setItem('authSession', JSON.stringify({
       userId: user.id,
@@ -969,6 +950,7 @@ async function handleLoginSubmit(event) {
       name: user.name,
       loggedInAt: new Date().toISOString()
     }));
+    localStorage.removeItem('authTokens'); // eski token kalıntısını temizle
 
     closeLoginModal();
     initAuthButtons();
@@ -980,7 +962,7 @@ async function handleLoginSubmit(event) {
     if (!payload?.user) {
       throw new Error('Giris yaniti alinmadi.');
     }
-    applyLoginState(payload.user, payload);
+    applyLoginState(payload.user);
   } catch (error) {
     if (error.status === 404) {
       alert('Kayıtlı kullanıcı bulunamadı. Önce üye olun.');
@@ -988,18 +970,6 @@ async function handleLoginSubmit(event) {
       openSignupModal();
       return;
     }
-
-    const validUser = storedUser && storedUser.email === email && storedUser.password === password;
-    if (validUser) {
-      applyLoginState({
-        id: storedUser.id || storedUser.userId || 0,
-        name: storedUser.name,
-        email: storedUser.email,
-        registeredAt: storedUser.registeredAt
-      }, null);
-      return;
-    }
-
     alert(error.message || 'E-posta veya şifre hatalı.');
   }
 }
@@ -1027,23 +997,14 @@ async function handleSignupSubmit(event) {
     return;
   }
 
-  const applySignupState = (user, authPayload) => {
-    const userData = {
+  const applySignupState = (user) => {
+    // Yalnızca UI için veri — token veya şifre saklanmaz
+    localStorage.setItem('user', JSON.stringify({
       id: user.id,
       userId: user.id,
       name: user.name,
       email: user.email,
-      password,
       registeredAt: user.registeredAt || new Date().toISOString()
-    };
-
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('authTokens', JSON.stringify({
-      accessToken: authPayload?.tokens?.accessToken || '',
-      refreshToken: authPayload?.tokens?.refreshToken || '',
-      tokenType: authPayload?.tokens?.tokenType || 'Bearer',
-      expiresIn: authPayload?.tokens?.expiresIn || '',
-      loggedInAt: new Date().toISOString()
     }));
     localStorage.setItem('authSession', JSON.stringify({
       userId: user.id,
@@ -1051,6 +1012,7 @@ async function handleSignupSubmit(event) {
       name: user.name,
       loggedInAt: new Date().toISOString()
     }));
+    localStorage.removeItem('authTokens'); // eski token kalıntısını temizle
 
     closeSignupModal();
     initAuthButtons();
@@ -1062,17 +1024,17 @@ async function handleSignupSubmit(event) {
     if (!payload?.user) {
       throw new Error('Kayit yaniti alinmadi.');
     }
-    applySignupState(payload.user, payload);
+    applySignupState(payload.user);
   } catch (error) {
     if (error.status === 409) {
       alert('Bu e-posta adresi zaten kullanılıyor.');
       return;
     }
 
+    // API erişilemiyorsa geçici UI kaydı — şifre ASLA saklanmaz
     const userData = {
       name,
       email,
-      password,
       registeredAt: new Date().toISOString()
     };
 

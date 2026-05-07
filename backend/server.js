@@ -189,6 +189,32 @@ function clearMaintenanceCookie() {
   return parts.join('; ');
 }
 
+const AUTH_COOKIE_SECURE = REQUIRE_HTTPS || HTTPS_ENABLED || process.env.NODE_ENV === 'production';
+
+function buildAuthCookie(name, value, maxAgeSeconds) {
+  const parts = [
+    `${name}=${encodeURIComponent(value)}`,
+    'Path=/',
+    `Max-Age=${Math.max(60, Math.floor(maxAgeSeconds))}`,
+    'HttpOnly',
+    'SameSite=Strict'
+  ];
+  if (AUTH_COOKIE_SECURE) parts.push('Secure');
+  return parts.join('; ');
+}
+
+function clearAuthCookie(name) {
+  const parts = [
+    `${name}=`,
+    'Path=/',
+    'Max-Age=0',
+    'HttpOnly',
+    'SameSite=Strict'
+  ];
+  if (AUTH_COOKIE_SECURE) parts.push('Secure');
+  return parts.join('; ');
+}
+
 function resolveUploadCategory(req) {
   const pathText = String(req.path || req.originalUrl || '').toLowerCase();
   if (pathText.includes('/uploads/cities')) return 'cities';
@@ -244,19 +270,21 @@ app.use('/api', moduleKillSwitchMiddleware);
 app.use(staticMaintenanceGate);
 app.use('/uploads', express.static(uploadRoot));
 
+// Admin panel HTML'i — geçerli admin JWT gerektirir
+['/panel', '/admin-panel', '/dashboard'].forEach((url) => {
+  app.get(url, requireAdminHtml, (_req, res) => res.sendFile(path.join(FRONTEND_DIR, 'admin.html')));
+});
+
 const CLEAN_URL_ROUTES = {
-  '/admin':         'admin-login.html',
-  '/login':         'admin-login.html',
-  '/admin-login':   'admin-login.html',
-  '/panel':         'admin.html',
-  '/admin-panel':   'admin.html',
-  '/dashboard':     'admin.html',
-  '/hakkimda':      'aboutme.html',
-  '/about':         'aboutme.html',
+  '/admin':          'admin-login.html',
+  '/login':          'admin-login.html',
+  '/admin-login':    'admin-login.html',
+  '/hakkimda':       'aboutme.html',
+  '/about':          'aboutme.html',
   '/rezervasyonlar': 'reservations.html',
-  '/rezervasyon':   'reservations.html',
-  '/sehir':         'city.html',
-  '/city':          'city.html'
+  '/rezervasyon':    'reservations.html',
+  '/sehir':          'city.html',
+  '/city':           'city.html'
 };
 
 Object.entries(CLEAN_URL_ROUTES).forEach(([url, file]) => {
@@ -482,8 +510,14 @@ function extractMaintenanceToken(req) {
   return extractBearerToken(req);
 }
 
+function extractAuthToken(req) {
+  const cookies = parseCookieHeader(req);
+  const cookieToken = String(cookies['authAccessToken'] || '').trim();
+  return cookieToken || extractBearerToken(req);
+}
+
 function requireAuth(req, res, next) {
-  const token = extractBearerToken(req);
+  const token = extractAuthToken(req);
   if (!token) {
     res.status(401).json({ message: 'Bu islem icin giris yapmaniz gerekiyor.' });
     return;
@@ -500,6 +534,22 @@ function requireAuth(req, res, next) {
     next();
   } catch (_error) {
     res.status(401).json({ message: 'Gecersiz veya suresi dolmus oturum.' });
+  }
+}
+
+function requireAdminHtml(req, res, next) {
+  const token = extractAuthToken(req);
+  if (!token) { res.redirect('/admin?denied=1'); return; }
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const role = normalizeUserRole(decoded?.role);
+    if (![USER_ROLES.PATRON, USER_ROLES.UST_YETKILI, USER_ROLES.ALT_YETKILI].includes(role)) {
+      res.redirect('/admin?denied=1');
+      return;
+    }
+    next();
+  } catch (_error) {
+    res.redirect('/admin?denied=1');
   }
 }
 
@@ -2447,6 +2497,8 @@ registerRoutes(app, {
   MAINTENANCE_TOKEN_TTL_SECONDS,
   MAINTENANCE_BOOTSTRAP_KEY,
   MAINTENANCE_COOKIE_NAME,
+  buildAuthCookie,
+  clearAuthCookie,
   buildMaintenanceCookie,
   clearMaintenanceCookie,
   verifyGoogleHumanCheckToken,

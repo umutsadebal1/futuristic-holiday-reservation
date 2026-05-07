@@ -110,7 +110,8 @@ function registerMaintenanceRoutes(app, deps) {
       if (typeof buildMaintenanceCookie === 'function') {
         res.setHeader('Set-Cookie', buildMaintenanceCookie(token, MAINTENANCE_TOKEN_TTL_SECONDS));
       }
-      res.json({ token, expiresIn: MAINTENANCE_TOKEN_TTL });
+      // Token yalnızca HttpOnly cookie içinde — body'de gönderilmez
+      res.json({ ok: true, expiresIn: MAINTENANCE_TOKEN_TTL });
     } catch (error) {
       handleApiError(res, error);
     }
