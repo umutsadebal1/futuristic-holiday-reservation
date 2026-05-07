@@ -19,6 +19,7 @@ const registerRoutes = require('./routes/register-routes');
 require('dotenv').config();
 
 const app = express();
+app.disable('x-powered-by');
 const PORT = Number(process.env.PORT) || 5000;
 const HTTPS_PORT = Number(process.env.HTTPS_PORT) || 5443;
 const HTTPS_ENABLED = String(process.env.HTTPS_ENABLED || 'true').trim().toLowerCase() !== 'false';
@@ -39,31 +40,57 @@ const MAINTENANCE_MODE = String(process.env.MAINTENANCE_MODE || '').trim().toLow
 const MAINTENANCE_MESSAGE = String(process.env.MAINTENANCE_MESSAGE || '').trim();
 const MAINTENANCE_TOKEN_TTL = String(process.env.MAINTENANCE_TOKEN_TTL || '12h').trim();
 const MAINTENANCE_BOOTSTRAP_KEY = String(process.env.MAINTENANCE_BOOTSTRAP_KEY || '').trim();
-const ALLOWED_ORIGINS = String(process.env.ALLOWED_ORIGINS || '')
-  .split(',').map(s => s.trim()).filter(Boolean);
+const PRODUCTION_ORIGINS = ['https://tatilrezerve.com', 'https://www.tatilrezerve.com'];
+const ALLOWED_ORIGINS = [
+  ...PRODUCTION_ORIGINS,
+  ...String(process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean)
+];
 
 // ── Security & Parsing Middleware ──────────────────────────────────────────
 app.use(cors({
-  origin: ALLOWED_ORIGINS.length
-    ? (origin, cb) => cb(null, !origin || ALLOWED_ORIGINS.includes(origin))
-    : true,
+  origin: (origin, cb) => {
+    // origin undefined = same-origin / server-to-server — allow
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  },
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Maintenance-Token'],
   credentials: true,
 }));
 app.use(helmet({
-  contentSecurityPolicy: false,           // HTML meta tags handle CSP
-  crossOriginResourcePolicy: { policy: 'cross-origin' }, // uploaded images
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:     ["'self'"],
+      styleSrc:       ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc:        ["'self'", 'https://fonts.gstatic.com'],
+      scriptSrc:      ["'self'", 'https://www.google.com', 'https://www.gstatic.com',
+                       'https://www.recaptcha.net', 'https://unpkg.com', 'https://cdn.jsdelivr.net'],
+      imgSrc:         ["'self'", 'data:', 'https:'],
+      connectSrc:     ["'self'", 'https://www.google.com', 'https://www.recaptcha.net',
+                       'https://www.gstatic.com', 'https://recaptchaenterprise.googleapis.com'],
+      frameSrc:       ["'self'", 'https://www.google.com', 'https://maps.google.com',
+                       'https://www.recaptcha.net', 'https://www.gstatic.com'],
+      frameAncestors: ["'none'"],
+      baseUri:        ["'self'"],
+      formAction:     ["'self'"],
+    },
+  },
 }));
-// frame-ancestors meta tag'de görmezden gelinir; HTTP header zorunlu
-app.use((_req, res, next) => {
-  res.setHeader('Content-Security-Policy', "frame-ancestors 'none'");
-  next();
-});
 app.use(compression());
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 }
 app.use(express.json({ limit: '1mb' }));
+// Malformed JSON body — SyntaxError'ı JSON cevabına dönüştür
+app.use((err, _req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ message: 'Geçersiz JSON formatı.' });
+  }
+  next(err);
+});
 app.set('trust proxy', 1);
 
 const authLimiter = rateLimit({
@@ -2461,6 +2488,23 @@ registerRoutes(app, {
   checkApiIntegration,
   handleApiError,
   insertActivityLog
+});
+
+// 404 — tanımsız rota (HTML yerine JSON döner, yanlış HTTP metodu dahil)
+app.use((_req, res) => {
+  res.status(404).json({ message: 'Kaynak bulunamadı.' });
+});
+
+// Global hata yakalayıcı — production'da stack trace gizlenir
+app.use((err, _req, res, _next) => {
+  const isProd = process.env.NODE_ENV === 'production';
+  const status = Number(err?.status || err?.statusCode) || 500;
+  if (status >= 500) console.error(err);
+  if (res.headersSent) return;
+  const message = (isProd && status >= 500)
+    ? 'Beklenmeyen bir hata oluştu.'
+    : (err?.message || 'Sunucu hatası.');
+  res.status(status).json({ message });
 });
 
 async function ensureSelfSignedCert() {
