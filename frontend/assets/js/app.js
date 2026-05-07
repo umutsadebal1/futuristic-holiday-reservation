@@ -1306,8 +1306,8 @@ async function submitReservation(event) {
                     localStorage.setItem('reservations', JSON.stringify(saved));
                 }
             }
-        } catch (_err) {
-            // Backend hatası oluşsa da rezervasyon localStorage'da kaydedildi
+        } catch (backendErr) {
+            console.warn('Rezervasyon backend kaydı başarısız:', backendErr?.message || backendErr);
         }
     }
 
@@ -2477,6 +2477,7 @@ function applyCatalogPayload(payload) {
     if (!citySlug || !nextCityMap[citySlug]) return;
 
     const hotelItem = {
+      id: hotel.id || 0,
       name: hotel.name || 'İsimsiz Otel',
       image: hotel.image || 'img/logo.png',
       rating: Number(hotel.rating) || 0,
