@@ -2370,6 +2370,7 @@ function mapReservationRow(row) {
     id: row.id,
     userId: row.user_id,
     hotelId: row.hotel_id,
+    hotelName: row.hotel_name || '',
     roomTypeId: row.room_type_id,
     checkIn: row.check_in,
     checkOut: row.check_out,

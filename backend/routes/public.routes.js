@@ -127,10 +127,11 @@ function registerPublicRoutes(app, deps) {
 
       const result = await pool.query(
         `
-          SELECT *
-          FROM reservations
-          WHERE user_id = $1
-          ORDER BY created_at DESC
+          SELECT r.*, h.name AS hotel_name
+          FROM reservations r
+          LEFT JOIN hotels h ON h.id = r.hotel_id
+          WHERE r.user_id = $1
+          ORDER BY r.created_at DESC
         `,
         [targetUserId]
       );

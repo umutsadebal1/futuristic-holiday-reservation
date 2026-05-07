@@ -1323,7 +1323,7 @@ async function submitReservation(event) {
     // Backend'e gönder (admin panelinde görünsün)
     if (hotelId) {
         try {
-            await requestAuthApi('/api/reservations/quick', {
+            const backendResp = await requestAuthApi('/api/reservations/quick', {
                 hotelId,
                 checkIn,
                 checkOut,
@@ -1331,6 +1331,15 @@ async function submitReservation(event) {
                 totalAmount,
                 notes: [guestName, guestEmail, guestPhone, roomType, specialRequests].filter(Boolean).join(' | ')
             });
+            // Backend ID'sini localStorage kaydına etiketle (senkronizasyon için)
+            if (backendResp?.reservation?.id) {
+                const saved = JSON.parse(localStorage.getItem('reservations') || '[]');
+                const entry = saved.find((r) => r.id === localId);
+                if (entry) {
+                    entry._backendId = backendResp.reservation.id;
+                    localStorage.setItem('reservations', JSON.stringify(saved));
+                }
+            }
         } catch (_err) {
             // Backend hatası oluşsa da rezervasyon localStorage'da kaydedildi
         }
@@ -1794,13 +1803,12 @@ function getReservationType(reservation) {
   return 'upcoming';
 }
 
-// localStorage'dan tüm reservation'ları getir ve sayfada göster
-function loadReservations() {
-    const reservations = JSON.parse(localStorage.getItem('reservations')) || [];
+// Backend ve localStorage'dan rezervasyonları getir, birleştir ve sayfada göster
+async function loadReservations() {
     const content = document.getElementById('reservationsContent');
   const summary = document.getElementById('reservationsSummary');
   const filterWrap = document.getElementById('reservationFilters');
-    
+
     if (!content) return;
 
   if (filterWrap && filterWrap.dataset.bound !== 'true') {
@@ -1820,6 +1828,49 @@ function loadReservations() {
       tab.classList.toggle('active', tab.getAttribute('data-res-filter') === reservationActiveFilter);
     });
   }
+
+  // localStorage rezervasyonlarını al ve kaynak/index bilgisi ekle
+  const localReservations = (JSON.parse(localStorage.getItem('reservations')) || []).map((r, i) => ({
+    ...r,
+    _source: 'local',
+    _localIndex: i
+  }));
+
+  // Backend'den rezervasyonları çek (giriş yapmışsa)
+  let backendReservations = [];
+  const token = getAccessToken();
+  if (token) {
+    try {
+      const data = await requestAuthGet('/api/reservations');
+      const statusMap = { confirmed: 'Onaylandı', cancelled: 'İptal Edildi', pending: 'Beklemede', completed: 'Onaylandı' };
+      backendReservations = (data.reservations || []).map((r) => ({
+        id: 'B' + r.id,
+        resortName: r.hotelName || 'Otel',
+        guestName: '',
+        guestEmail: '',
+        guestPhone: '',
+        checkIn: r.checkIn ? String(r.checkIn).slice(0, 10) : '',
+        checkOut: r.checkOut ? String(r.checkOut).slice(0, 10) : '',
+        guests: r.guestCount || 1,
+        roomType: 'Standart',
+        totalPrice: '₺' + Number(r.totalAmount || 0).toLocaleString('tr-TR'),
+        status: statusMap[String(r.status || '').toLowerCase()] || 'Beklemede',
+        specialRequests: '',
+        _source: 'backend',
+        _backendId: r.id,
+        _localIndex: -1
+      }));
+    } catch (_e) { /* backend erişilemiyorsa localStorage ile devam */ }
+  }
+
+  // Backend'deki ID'leri bir set'e al
+  const backendIdSet = new Set(backendReservations.map((r) => r._backendId));
+
+  // localStorage'da _backendId eşleşen girişleri hariç tut (backend kaydı daha güncel)
+  const localOnly = localReservations.filter((r) => !r._backendId || !backendIdSet.has(r._backendId));
+
+  // Birleştirilmiş liste: backend önce, sonra sadece local olanlar
+  const reservations = [...backendReservations, ...localOnly];
 
   const prepared = reservations
     .map((res, index) => ({
@@ -1987,8 +2038,8 @@ function loadReservations() {
 
                 <!-- Düzenle / İptal Et Butonları -->
                 <div class="booking-actions">
-                  <button class="btn-edit js-edit-reservation" data-res-index="${res._index}">Detay / Düzenle</button>
-                  <button class="btn-cancel js-cancel-reservation" data-res-index="${res._index}">Rezervasyonu İptal Et</button>
+                  ${res._source === 'local' ? `<button class="btn-edit js-edit-reservation" data-res-local-index="${res._localIndex}">Detay / Düzenle</button>` : ''}
+                  <button class="btn-cancel js-cancel-reservation" data-res-source="${res._source}" data-res-backend-id="${res._backendId || ''}" data-res-local-index="${res._localIndex !== undefined ? res._localIndex : -1}" ${String(res.status || '').includes('İptal') ? 'disabled' : ''}>Rezervasyonu İptal Et</button>
                 </div>
               </article>
         `;
@@ -1996,15 +2047,17 @@ function loadReservations() {
 
           content.querySelectorAll('.js-edit-reservation').forEach((btn) => {
             btn.addEventListener('click', () => {
-              const index = Number(btn.getAttribute('data-res-index') || 0);
-              editReservation(index);
+              const localIndex = Number(btn.getAttribute('data-res-local-index') ?? 0);
+              editReservation(localIndex);
             });
           });
 
           content.querySelectorAll('.js-cancel-reservation').forEach((btn) => {
             btn.addEventListener('click', () => {
-              const index = Number(btn.getAttribute('data-res-index') || 0);
-              cancelReservation(index);
+              const source = btn.getAttribute('data-res-source') || 'local';
+              const backendId = Number(btn.getAttribute('data-res-backend-id')) || 0;
+              const localIndex = Number(btn.getAttribute('data-res-local-index') ?? -1);
+              cancelReservation(source, backendId, localIndex);
             });
           });
 }
@@ -2151,29 +2204,49 @@ const editReservation = (index) => {
   openReservationEditModal(index);
 };
 
-// Belirtilen reservation'ı iptal et
-const cancelReservation = (index) => {
-    // Kullanıcıdan iptal onayı iste
-    if (confirm('Bu rezervasyonu iptal etmek istediğinizden emin misiniz?')) {
-        const reservations = JSON.parse(localStorage.getItem('reservations')) || [];
-        if (!reservations[index]) {
-          alert('Iptal edilecek rezervasyon bulunamadi.');
-          return;
+// Belirtilen rezervasyonu iptal et (backend + localStorage)
+const cancelReservation = async (source, backendId, localIndex) => {
+    if (!confirm('Bu rezervasyonu iptal etmek istediğinizden emin misiniz?')) return;
+
+    // Backend kaydı varsa API üzerinden iptal et
+    if (source === 'backend' && backendId) {
+        try {
+            const token = getAccessToken();
+            const resp = await fetch('/api/reservations/' + backendId + '/cancel', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+                body: JSON.stringify({ reason: 'Kullanıcı tarafından iptal edildi.' })
+            });
+            if (!resp.ok) {
+                const data = await resp.json().catch(() => ({}));
+                alert(data.message || 'İptal işlemi başarısız oldu.');
+                return;
+            }
+        } catch (_e) {
+            alert('Bağlantı hatası, lütfen tekrar deneyin.');
+            return;
         }
-        reservations[index].status = 'İptal Edildi'; // Durumu "İptal Edildi" olarak ayarla
-        localStorage.setItem('reservations', JSON.stringify(reservations)); // Güncelle
-
-        reservationActiveFilter = 'cancelled';
-        updateReservationFilterInUrl();
-        loadReservations(); // Sayfayı yenile
-
-        const cancelledTab = document.querySelector('[data-res-filter="cancelled"]');
-        if (cancelledTab) {
-          cancelledTab.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        alert('Rezervasyon başarıyla iptal edildi. İptaller sekmesine yönlendirildiniz.');
     }
+
+    // localStorage kaydı varsa orada da güncelle
+    if (localIndex >= 0) {
+        const reservations = JSON.parse(localStorage.getItem('reservations')) || [];
+        if (reservations[localIndex]) {
+            reservations[localIndex].status = 'İptal Edildi';
+            localStorage.setItem('reservations', JSON.stringify(reservations));
+        }
+    }
+
+    reservationActiveFilter = 'cancelled';
+    updateReservationFilterInUrl();
+    loadReservations();
+
+    const cancelledTab = document.querySelector('[data-res-filter="cancelled"]');
+    if (cancelledTab) {
+        cancelledTab.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    alert('Rezervasyon başarıyla iptal edildi. İptaller sekmesine yönlendirildiniz.');
 };
 // Bir HTML elemanında "active" sınıfını aç/kapat
 const elementToggleFunc = function (elem) { 
@@ -3088,6 +3161,13 @@ function initSmartSearch() {
     event.preventDefault();
     searchResorts();
   });
+
+  // Ara butonu
+  const searchBtn = document.getElementById('searchSubmitBtn');
+  if (searchBtn && !searchBtn.dataset.bound) {
+    searchBtn.dataset.bound = 'true';
+    searchBtn.addEventListener('click', () => searchResorts());
+  }
 
   // Input veya dropdown dışında tıklanırsa önerileri gizle
   document.addEventListener("click", (e) => {
