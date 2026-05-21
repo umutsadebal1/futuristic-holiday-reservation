@@ -2621,8 +2621,22 @@ registerRoutes(app, {
   insertActivityLog
 });
 
-// 404 — tanımsız rota (HTML yerine JSON döner, yanlış HTTP metodu dahil)
-app.use((_req, res) => {
+// 404 — tanımsız rota
+// Tarayıcı navigasyonunda temalı 404.html, API/asset isteklerinde JSON döner.
+app.use((req, res) => {
+  const pathName = String(req.path || '/').toLowerCase();
+  const ext = path.extname(pathName);
+  const isApi = pathName.startsWith('/api/') || pathName === '/api';
+  const acceptsHtml = (req.headers.accept || '').includes('text/html');
+  const looksLikeHtml = !ext || ext === '.html' || ext === '.htm';
+
+  if (req.method === 'GET' && !isApi && acceptsHtml && looksLikeHtml) {
+    res.status(404);
+    res.setHeader('Cache-Control', 'no-store');
+    res.sendFile(path.join(FRONTEND_DIR, '404.html'));
+    return;
+  }
+
   res.status(404).json({ message: 'Kaynak bulunamadı.' });
 });
 
